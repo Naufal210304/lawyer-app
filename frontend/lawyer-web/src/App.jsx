@@ -15,6 +15,8 @@ import BlogDetail from "./pages/BlogDetail";
 // ADMIN
 import Login from "./pages/admin/Login";
 import Dashboard from "./pages/admin/Dashboard";
+import BlogManagement from "./pages/admin/Blog";
+import CreateBlog from "./pages/admin/CreateBlog";
 
 // AUTH
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -64,6 +66,28 @@ const Layout = () => {
               <ProtectedRoute allowedRoles={["admin", "superadmin"]}>
                 <AdminLayout>
                   <Dashboard />
+                </AdminLayout>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/admin/blogs"
+            element={
+              <ProtectedRoute allowedRoles={["admin", "superadmin"]}>
+                <AdminLayout>
+                  <BlogManagement />
+                </AdminLayout>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/admin/blogs/create"
+            element={
+              <ProtectedRoute allowedRoles={["admin", "superadmin"]}>
+                <AdminLayout>
+                  <CreateBlog />
                 </AdminLayout>
               </ProtectedRoute>
             }

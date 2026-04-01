@@ -39,7 +39,7 @@ const Dashboard = () => {
         </h1>
         <p className="text-sm md:text-base text-gray-600">
           Selamat datang kembali,
-          <span className="font-semibold text-[#C5A02E]"> {username}</span> ({role})
+          <span className="font-semibold text-blue-600"> {username}</span> ({role})
         </p>
       </div>
 
@@ -47,9 +47,9 @@ const Dashboard = () => {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-6 md:mb-8">
 
         {["Total Blog", "Konsultasi Pending", "Total Team", "Akun Pending"].map((title, i) => (
-          <div key={i} className="bg-white p-4 md:p-6 rounded-xl shadow-sm border">
+          <div key={i} className="bg-white p-4 md:p-6 rounded-xl shadow-sm border border-slate-200 hover:border-blue-300 transition-colors">
             <h3 className="text-gray-500 text-sm">{title}</h3>
-            <p className="text-xl md:text-2xl font-bold">{[24,8,12,3][i]}</p>
+            <p className="text-xl md:text-2xl font-bold text-slate-900">{[24,8,12,3][i]}</p>
           </div>
         ))}
 
@@ -59,7 +59,7 @@ const Dashboard = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
 
         {/* Chart */}
-        <div className="lg:col-span-2 bg-white p-4 md:p-6 rounded-xl shadow-sm border">
+        <div className="lg:col-span-2 bg-white p-4 md:p-6 rounded-xl shadow-sm border border-slate-200">
           <h2 className="text-base md:text-lg font-bold mb-4 md:mb-6">
             Statistik Konsultasi Disetujui (1 Tahun)
           </h2>
@@ -75,7 +75,7 @@ const Dashboard = () => {
                   {chartData.map((entry, index) => (
                     <Cell
                       key={index}
-                      fill={index === 11 ? '#C5A02E' : '#e5e7eb'}
+                      fill={index === 11 ? '#2563eb' : '#e2e8f0'}
                     />
                   ))}
                 </Bar>
@@ -85,21 +85,21 @@ const Dashboard = () => {
         </div>
 
         {/* Activity */}
-        <div className="bg-white p-4 md:p-6 rounded-xl shadow-sm border">
+        <div className="bg-white p-4 md:p-6 rounded-xl shadow-sm border border-slate-200">
           <h2 className="text-base md:text-lg font-bold mb-4 md:mb-6">
             Aktivitas Konsultasi
           </h2>
 
           {recentActivities.map((item) => (
             <div key={item.id} className="mb-3 md:mb-4">
-              <p className="font-medium text-sm md:text-base">{item.name}</p>
+              <p className="font-medium text-sm md:text-base text-slate-900">{item.name}</p>
               <p className="text-xs md:text-sm text-gray-500">
-                {item.status} • {item.time}
+                <span className={item.status === 'Approved' ? 'text-blue-600' : 'text-orange-500'}>{item.status}</span> • {item.time}
               </p>
             </div>
           ))}
 
-          <button className="w-full mt-4 md:mt-6 py-2 text-sm text-[#C5A02E] font-semibold border rounded-lg">
+          <button className="w-full mt-4 md:mt-6 py-2 text-sm text-blue-600 font-semibold border border-blue-100 rounded-lg hover:bg-blue-50 transition-colors">
             Lihat Semua
           </button>
         </div>

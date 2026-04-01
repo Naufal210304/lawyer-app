@@ -6,7 +6,7 @@ const Layout = ({ children }) => {
   const [isMobileOpen, setIsMobileOpen] = useState(false);
 
   return (
-    <div className="flex h-screen bg-gray-100 overflow-hidden">
+    <div className="flex h-screen bg-slate-50 overflow-hidden">
 
       {/* Sidebar */}
       <Sidebar

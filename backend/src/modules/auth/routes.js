@@ -1,8 +1,11 @@
 const express = require('express');
 const router = express.Router();
+const authController = require('./controller');
 
-router.get('/login', (req, res) => {
-  res.send('Login route');
-});
+// Rute untuk Login
+router.post('/login', authController.login);
+
+// Rute untuk Registrasi Admin (biasanya digunakan oleh Superadmin)
+router.post('/register', authController.register);
 
 module.exports = router;
