@@ -18,6 +18,7 @@ import Dashboard from "./pages/admin/Dashboard";
 
 // AUTH
 import ProtectedRoute from "./components/ProtectedRoute";
+import AdminLayout from "./components/layout/Layout";
 
 // 🔥 Layout Wrapper (biar bisa pakai useLocation)
 const Layout = () => {
@@ -61,7 +62,9 @@ const Layout = () => {
             path="/admin/dashboard"
             element={
               <ProtectedRoute allowedRoles={["admin", "superadmin"]}>
-                <Dashboard />
+                <AdminLayout>
+                  <Dashboard />
+                </AdminLayout>
               </ProtectedRoute>
             }
           />
