@@ -7,6 +7,21 @@ const hashPassword = async (password) => {
   return await bcrypt.hash(password, saltRounds);
 };
 
+// GET ALL USERS
+const getAllUsers = async () => {
+  return await userModel.getAllUsers();
+};
+
+// GET USER BY ID
+const getUserById = async (id) => {
+  return await userModel.getUserById(id);
+};
+
+// DELETE USER
+const deleteUser = async (id) => {
+  return await userModel.deleteUser(id);
+};
+
 // Verify password
 const verifyPassword = async (password, hashedPassword) => {
   return await bcrypt.compare(password, hashedPassword);
@@ -38,32 +53,62 @@ const authenticateUser = async (identifier, password) => {
   };
 };
 
-// REGISTER
+// REGISTER - Now creates pending user
 const registerUser = async (userData) => {
-  let { username, email, password, role_id } = userData;
+  let { username, email, password, phone_number, role_id } = userData;
 
   // sanitasi
   username = username.trim();
   email = email.trim();
 
-  // cek user sudah ada
+  // cek user sudah ada di users table
   const existingUser = await userModel.findUserByEmail(email);
 
   if (existingUser) {
     throw new Error('User already exists');
   }
 
+  // cek juga di pending_users table
+  const existingPendingUser = await userModel.findPendingUserByEmail(email);
+
+  if (existingPendingUser) {
+    throw new Error('Registration pending. Awaiting admin approval');
+  }
+
   const hashedPassword = await hashPassword(password);
 
-  return await userModel.createUser({
+  // Insert ke pending_users instead of users
+  return await userModel.createPendingUser({
     username,
     email,
     password: hashedPassword,
-    role_id
+    phone_number,
+    role_id: role_id || 2 // default admin
   });
+};
+
+// GET PENDING USERS
+const getPendingUsers = async () => {
+  return await userModel.getPendingUsers();
+};
+
+// APPROVE PENDING USER
+const approvePendingUser = async (id) => {
+  return await userModel.approvePendingUser(id);
+};
+
+// DELETE PENDING USER
+const deletePendingUser = async (id) => {
+  return await userModel.deletePendingUser(id);
 };
 
 module.exports = {
   authenticateUser,
-  registerUser
+  registerUser,
+  getAllUsers,
+  getUserById,
+  deleteUser,
+  getPendingUsers,
+  approvePendingUser,
+  deletePendingUser
 };

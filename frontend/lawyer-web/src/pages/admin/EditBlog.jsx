@@ -1,10 +1,12 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import axios from '../../services/axios';
 
-const CreateBlog = () => {
+const EditBlog = () => {
   const navigate = useNavigate();
-  const [isLoading, setIsLoading] = useState(false);
+  const { id } = useParams();
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState('');
 
   const [formData, setFormData] = useState({
@@ -18,7 +20,39 @@ const CreateBlog = () => {
   const [image, setImage] = useState(null);
   const [preview, setPreview] = useState(null);
 
-  // Fungsi untuk generate slug otomatis saat judul diketik
+  // Fetch blog data
+  useEffect(() => {
+    const fetchBlog = async () => {
+      try {
+        const response = await axios.get('/blogs');
+        const blog = response.data.data.find(b => b.id === parseInt(id));
+        
+        if (blog) {
+          setFormData({
+            title: blog.title,
+            slug: blog.slug,
+            category_id: blog.category_id || '',
+            type: blog.type,
+            status: blog.status,
+            content: blog.content,
+          });
+          if (blog.image_url) {
+            setPreview(`http://localhost:3001${blog.image_url}`);
+          }
+        } else {
+          setError('Blog tidak ditemukan');
+        }
+      } catch (err) {
+        setError('Gagal memuat blog');
+        console.error(err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchBlog();
+  }, [id]);
+
   const handleTitleChange = (e) => {
     const title = e.target.value;
     const slug = title
@@ -38,11 +72,10 @@ const CreateBlog = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsLoading(true);
+    setIsSaving(true);
     setError('');
 
     try {
-      // Menyiapkan FormData karena ada file (image_url)
       const data = new FormData();
       data.append('title', formData.title);
       data.append('slug', formData.slug);
@@ -55,27 +88,35 @@ const CreateBlog = () => {
         data.append('image', image);
       }
 
-      await axios.post('/blogs', data, {
+      await axios.put(`/blogs/${id}`, data, {
         headers: {
           'Content-Type': 'multipart/form-data',
         }
       });
 
-      alert('Artikel berhasil dipublikasikan!');
+      alert('Artikel berhasil diperbarui!');
       navigate('/admin/blogs');
     } catch (err) {
       setError(err.response?.data?.message || 'Gagal menyimpan artikel. Coba lagi nanti.');
     } finally {
-      setIsLoading(false);
+      setIsSaving(false);
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-6xl">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-2xl md:text-3xl font-bold text-slate-900 tracking-tight">Buat Artikel Baru</h1>
-        <p className="text-slate-500 mt-1">Lengkapi form di bawah untuk mempublikasikan wawasan hukum baru.</p>
+        <h1 className="text-2xl md:text-3xl font-bold text-slate-900 tracking-tight">Edit Artikel</h1>
+        <p className="text-slate-500 mt-1">Perbarui artikel yang sudah ada.</p>
       </div>
 
       {error && (
@@ -192,7 +233,7 @@ const CreateBlog = () => {
                 onChange={handleImageChange}
               />
             </div>
-            {preview && (
+            {preview && image && (
               <button type="button" onClick={() => {setPreview(null); setImage(null)}} className="w-full text-xs text-red-500 font-bold hover:underline">Hapus & Ganti Gambar</button>
             )}
           </div>
@@ -201,12 +242,12 @@ const CreateBlog = () => {
           <div className="flex flex-col gap-3 pt-2">
             <button 
               type="submit" 
-              disabled={isLoading}
-              className={`w-full bg-blue-600 text-white font-bold py-4 rounded-xl shadow-lg shadow-blue-100 transition-all ${isLoading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-700 hover:-translate-y-0.5'}`}
+              disabled={isSaving}
+              className={`w-full bg-blue-600 text-white font-bold py-4 rounded-xl shadow-lg shadow-blue-100 transition-all ${isSaving ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-700 hover:-translate-y-0.5'}`}
             >
-              {isLoading ? 'Sedang Memproses...' : 'Simpan Artikel'}
+              {isSaving ? 'Sedang Memproses...' : 'Perbarui Artikel'}
             </button>
-            <button type="button" disabled={isLoading} onClick={() => navigate('/admin/blogs')} className="w-full bg-slate-100 text-slate-600 font-bold py-4 rounded-xl hover:bg-slate-200 transition-all">
+            <button type="button" disabled={isSaving} onClick={() => navigate('/admin/blogs')} className="w-full bg-slate-100 text-slate-600 font-bold py-4 rounded-xl hover:bg-slate-200 transition-all">
               Batal
             </button>
           </div>
@@ -216,4 +257,4 @@ const CreateBlog = () => {
   );
 };
 
-export default CreateBlog;
+export default EditBlog;

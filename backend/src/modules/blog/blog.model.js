@@ -33,9 +33,10 @@ const createBlog = (data) => {
 const getBlogs = () => {
   return new Promise((resolve, reject) => {
     const query = `
-      SELECT blogs.*, users.username as author_name 
+      SELECT blogs.*, users.username as author_name, categories.name as category_name 
       FROM blogs 
       LEFT JOIN users ON blogs.author_id = users.id 
+      LEFT JOIN categories ON blogs.category_id = categories.id 
       ORDER BY blogs.created_at DESC
     `;
 

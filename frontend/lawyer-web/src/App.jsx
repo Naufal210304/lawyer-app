@@ -21,6 +21,7 @@ import ConsultationManagement from "./pages/admin/Consultation";
 import ReportManagement from "./pages/admin/Report";
 import PartnerManagement from "./pages/admin/Partners";
 import CreateBlog from "./pages/admin/CreateBlog";
+import EditBlog from "./pages/admin/EditBlog";
 import PracticeAreaManagement from "./pages/admin/PracticeArea";
 import SettingsManagement from "./pages/admin/Settings";
 
@@ -138,6 +139,14 @@ const AppContent = () => {
             element={
               <ProtectedRoute allowedRoles={["admin", "superadmin"]}>
                 <AdminLayout><CreateBlog /></AdminLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/blogs/:id/edit"
+            element={
+              <ProtectedRoute allowedRoles={["admin", "superadmin"]}>
+                <AdminLayout><EditBlog /></AdminLayout>
               </ProtectedRoute>
             }
           />

@@ -40,7 +40,7 @@ const login = async (req, res) => {
 
 const register = async (req, res) => {
   try {
-    const { username, email, password } = req.body;
+    const { username, email, password, phone_number } = req.body;
 
     const role_id = 2; // default admin
 
@@ -52,9 +52,9 @@ const register = async (req, res) => {
       return res.status(400).json({ message: 'Invalid email' });
     }
 
-    await userService.registerUser({ username, email, password, role_id });
+    await userService.registerUser({ username, email, password, phone_number, role_id });
 
-    res.json({ message: 'Registration successful' });
+    res.json({ message: 'Registration successful. Waiting for approval from admin.' });
 
   } catch (error) {
     console.error('Register error:', error);
@@ -62,4 +62,79 @@ const register = async (req, res) => {
   }
 };
 
-module.exports = { login, register };
+const me = async (req, res) => {
+  try {
+    const user = await userService.getUserById(req.user.id);
+    res.json({
+      user: {
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        role: user.role_id === 1 ? 'superadmin' : 'admin'
+      }
+    });
+  } catch (error) {
+    console.error('Me error:', error);
+    res.status(500).json({ message: 'Failed to get user data' });
+  }
+};
+
+const getPendingUsers = async (req, res) => {
+  try {
+    // Check if user is superadmin
+    if (req.user.role !== 'superadmin') {
+      return res.status(403).json({ message: 'Only superadmin can view pending users' });
+    }
+
+    const pendingUsers = await userService.getPendingUsers();
+    res.json({
+      success: true,
+      message: 'Pending users fetched successfully',
+      data: pendingUsers
+    });
+  } catch (error) {
+    console.error('GetPendingUsers error:', error);
+    res.status(500).json({ message: 'Failed to get pending users' });
+  }
+};
+
+const approvePendingUser = async (req, res) => {
+  try {
+    // Check if user is superadmin
+    if (req.user.role !== 'superadmin') {
+      return res.status(403).json({ message: 'Only superadmin can approve users' });
+    }
+
+    const { id } = req.params;
+    const approvedUser = await userService.approvePendingUser(id);
+    res.json({
+      success: true,
+      message: 'User approved successfully',
+      data: approvedUser
+    });
+  } catch (error) {
+    console.error('ApprovePendingUser error:', error);
+    res.status(500).json({ message: error.message || 'Failed to approve user' });
+  }
+};
+
+const rejectPendingUser = async (req, res) => {
+  try {
+    // Check if user is superadmin
+    if (req.user.role !== 'superadmin') {
+      return res.status(403).json({ message: 'Only superadmin can reject users' });
+    }
+
+    const { id } = req.params;
+    const deleted = await userService.deletePendingUser(id);
+    if (!deleted) {
+      return res.status(404).json({ message: 'Pending user not found' });
+    }
+    res.json({ success: true, message: 'Pending user rejected' });
+  } catch (error) {
+    console.error('RejectPendingUser error:', error);
+    res.status(500).json({ message: 'Failed to reject user' });
+  }
+};
+
+module.exports = { login, register, me, getPendingUsers, approvePendingUser, rejectPendingUser };

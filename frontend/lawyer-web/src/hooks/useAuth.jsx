@@ -1,11 +1,14 @@
-const useAuth = () => {
-  const token = localStorage.getItem('token');
-  const role = localStorage.getItem('role');
+import { useContext } from "react";
+import AuthContext from "../context/AuthContext";
 
-  return {
-    isAuthenticated: !!token,
-    role,
-  };
+const useAuth = () => {
+  const context = useContext(AuthContext);
+
+  if (!context) {
+    throw new Error("useAuth must be used within an AuthProvider");
+  }
+
+  return context;
 };
 
 export default useAuth;

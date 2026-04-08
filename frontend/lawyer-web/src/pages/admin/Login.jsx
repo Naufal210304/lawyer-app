@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios'; // Pastikan sudah install: npm install axios
+import axios from '../../services/axios';
+import useAuth from '../../hooks/useAuth';
 
 const Login = () => {
   const [isRegister, setIsRegister] = useState(false);
-  
-  // Menggunakan 'identifier' karena di DB ada username & email yang unik
-  const [identifier, setIdentifier] = useState(''); 
+
+  // Login states
+  const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
 
   // Register states
@@ -18,41 +19,34 @@ const Login = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+
   const navigate = useNavigate();
+  const { login, token, loading, role } = useAuth(); // ambil role juga
 
-  // Jika sudah login (ada token), langsung lempar ke dashboard
+  // Redirect ke dashboard jika sudah login dan role valid
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (token) navigate('/admin/dashboard');
-  }, [navigate]);
+    if (!loading && token && role && ["admin", "superadmin"].includes(role)) {
+      navigate('/admin/dashboard');
+    }
+  }, [token, loading, role, navigate]);
 
+  // ===================== HANDLE LOGIN =====================
   const handleLogin = async (e) => {
     e.preventDefault();
     setError('');
     setIsLoading(true);
 
     try {
-      // Endpoint disesuaikan dengan struktur backend Express kamu nantinya
-      const response = await axios.post('http://localhost:3001/api/auth/login', {
-        // Mengirimkan identifier. Pastikan backend mengecek field ini di kolom 'username' ATAU 'email'
-        identifier: identifier, 
-        username: identifier, // Beberapa backend template mengharuskan key bernama 'username'
-        password: password
-      });
-
-      const { token, role, user } = response.data;
-      localStorage.setItem('token', token);
-      localStorage.setItem('role', role); // Menyimpan nama role (admin/superadmin)
-      localStorage.setItem('userId', user.id); // Simpan ID agar bisa dipakai saat buat Blog
-      navigate('/admin/dashboard');
+      await login(identifier, password); // update global state token & user
+      // Jangan navigate di sini lagi, biar useEffect yang handle
     } catch (err) {
-      console.error("Detail Error Login:", err.response); // Cek console untuk melihat pesan dari server
       setError(err.response?.data?.message || 'Login gagal. Periksa kembali akun Anda.');
     } finally {
       setIsLoading(false);
     }
   };
 
+  // ===================== HANDLE REGISTER =====================
   const handleRegister = async (e) => {
     e.preventDefault();
     setError('');
@@ -60,17 +54,16 @@ const Login = () => {
     setIsLoading(true);
 
     try {
-      // API endpoint untuk registrasi admin biasa (role_id: 2)
-      await axios.post('http://localhost:3001/api/auth/register', {
+      await axios.post('/auth/register', {
         username: regUsername,
         email: regEmail,
         password: regPassword,
-        phone_number: regPhone, // Pastikan kolom ini ditambahkan di tabel users database Anda
-        role_id: 2 // Sesuai tabel roles: 1=superadmin, 2=admin
+        phone_number: regPhone
       });
 
-      setSuccess('Registrasi admin berhasil! Silakan login.');
+      setSuccess('Registrasi admin berhasil! Menunggu persetujuan dari superadmin.');
       setIsRegister(false);
+
       // Reset fields
       setRegUsername('');
       setRegEmail('');
@@ -83,11 +76,14 @@ const Login = () => {
     }
   };
 
+  // ===================== RENDER =====================
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 font-sans">
       <div className="max-w-md w-full bg-white rounded-lg shadow-md p-8">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-800">{isRegister ? 'Admin Register' : 'Admin Login'}</h1>
+          <h1 className="text-3xl font-bold text-gray-800">
+            {isRegister ? 'Admin Register' : 'Admin Login'}
+          </h1>
           <p className="text-gray-600">Lawyer App CMS</p>
         </div>
 
@@ -152,6 +148,7 @@ const Login = () => {
                   required
                 />
               </div>
+
               <div className="mb-4">
                 <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="regEmail">
                   Email
@@ -166,6 +163,7 @@ const Login = () => {
                   required
                 />
               </div>
+
               <div className="mb-4">
                 <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="regPhone">
                   Nomor Handphone
@@ -180,6 +178,7 @@ const Login = () => {
                   required
                 />
               </div>
+
               <div className="mb-6">
                 <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="regPassword">
                   Password

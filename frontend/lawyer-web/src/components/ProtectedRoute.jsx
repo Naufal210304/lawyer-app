@@ -1,20 +1,20 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
+import useAuth from '../hooks/useAuth';
 
 const ProtectedRoute = ({ children, allowedRoles }) => {
-  // Mengambil data langsung dari localStorage agar sinkron dengan Login.jsx
-  const token = localStorage.getItem('token');
-  const role = localStorage.getItem('role');
+  const { user: _user, token, loading, role } = useAuth();
 
-  const isAuthenticated = !!token;
-
-  // Belum login
-  if (!isAuthenticated) {
-    return <Navigate to="/admin/login" replace />;
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600"></div>
+      </div>
+    );
   }
 
-  // Role tidak sesuai (mengarahkan ke login jika akses ditolak, bukan ke dashboard lagi untuk hindari loop)
-  if (allowedRoles && !allowedRoles.includes(role)) {
+  // Belum login atau role tidak diizinkan
+  if (!token || (allowedRoles && !allowedRoles.includes(role))) {
     return <Navigate to="/admin/login" replace />;
   }
 

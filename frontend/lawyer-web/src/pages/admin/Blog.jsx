@@ -1,35 +1,55 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import axios from '../../services/axios';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faCheckCircle, faPencil, faTrash, faPlus } from '@fortawesome/free-solid-svg-icons';
 
 const Blog = () => {
-  // Data dummy yang mengikuti struktur field database blogs
-  const blogs = [
-    { 
-      id: 1, 
-      author_id: 1, 
-      category_id: 1, 
-      title: "Pentingnya Legalitas Bisnis di Era Digital", 
-      slug: "pentingnya-legalitas-bisnis", 
-      type: "latest", 
-      content: "Isi konten artikel...", 
-      image_url: "/uploads/blog1.jpg", 
-      status: "published", 
-      created_at: "2023-10-15 10:00", 
-      updated_at: "2023-10-15 10:00" 
-    },
-    { 
-      id: 2, 
-      author_id: 1, 
-      category_id: 2, 
-      title: "Cara Menghadapi Sengketa Tanah", 
-      slug: "cara-menghadapi-sengketa-tanah", 
-      type: "suggest", 
-      content: "Isi konten artikel...", 
-      image_url: "/uploads/blog2.jpg", 
-      status: "draft", 
-      created_at: "2023-10-12 14:20", 
-      updated_at: "2023-10-12 14:20" 
-    },
-  ];
+  const navigate = useNavigate();
+  const [blogs, setBlogs] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
+
+  useEffect(() => {
+    fetchBlogs();
+  }, []);
+
+  const fetchBlogs = async () => {
+    try {
+      const response = await axios.get('/blogs');
+      setBlogs(response.data.data || []);
+    } catch (error) {
+      console.error('Error fetching blogs:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const updateStatus = async (id, status) => {
+    try {
+      await axios.put(`/blogs/${id}/status`, { status });
+      fetchBlogs(); // refresh list
+    } catch (error) {
+      console.error('Error updating status:', error);
+    }
+  };
+
+  const deleteBlog = async (id) => {
+    if (window.confirm('Apakah Anda yakin ingin menghapus blog ini?')) {
+      try {
+        await axios.delete(`/blogs/${id}`);
+        fetchBlogs(); // refresh list
+      } catch (error) {
+        console.error('Error deleting blog:', error);
+        alert('Gagal menghapus blog');
+      }
+    }
+  };
+
+  const filteredBlogs = blogs.filter(blog =>
+    blog.title.toLowerCase().includes(search.toLowerCase()) ||
+    blog.slug.toLowerCase().includes(search.toLowerCase())
+  );
 
   return (
     <div>
@@ -43,9 +63,12 @@ const Blog = () => {
             Kelola artikel, berita, dan wawasan hukum yang tampil di website.
           </p>
         </div>
-        <button className="bg-blue-600 text-white px-6 py-2.5 rounded-lg font-semibold text-sm hover:bg-blue-700 transition-colors shadow-md shadow-blue-200 w-fit">
-          + Buat Artikel Baru
-        </button>
+        <Link 
+          to="/admin/blogs/create"
+          className="bg-blue-600 text-white px-6 py-2.5 rounded-lg font-semibold text-sm hover:bg-blue-700 transition-colors shadow-md shadow-blue-200 w-fit flex items-center gap-2"
+        >
+          <FontAwesomeIcon icon={faPlus} /> Buat Artikel Baru
+        </Link>
       </div>
 
       {/* Table Container */}
@@ -57,6 +80,8 @@ const Blog = () => {
               type="text" 
               placeholder="Cari judul atau slug..." 
               className="w-full md:w-64 pl-3 pr-10 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
             />
           </div>
         </div>
@@ -74,8 +99,17 @@ const Blog = () => {
                 <th className="px-6 py-4 border-b text-center">Aksi</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 text-sm text-slate-700">
-              {blogs.map((blog) => (
+            {loading ? (
+              <tbody>
+                <tr>
+                  <td colSpan="7" className="px-6 py-8 text-center text-slate-500">
+                    Loading blogs...
+                  </td>
+                </tr>
+              </tbody>
+            ) : (
+              <tbody className="divide-y divide-slate-100 text-sm text-slate-700">
+              {filteredBlogs.map((blog) => (
                 <tr key={blog.id} className="hover:bg-blue-50/30 transition-colors group">
                   <td className="px-6 py-4 font-medium text-slate-400">#{blog.id}</td>
                   <td className="px-6 py-4">
@@ -113,17 +147,35 @@ const Blog = () => {
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex justify-center gap-3">
-                      <button className="p-1.5 text-blue-600 hover:bg-blue-100 rounded-md transition-colors" title="Edit">
-                        ✏️
+                      {blog.status === 'draft' && (
+                        <button 
+                          onClick={() => updateStatus(blog.id, 'published')}
+                          className="p-1.5 text-green-600 hover:bg-green-100 rounded-md transition-colors" 
+                          title="Approve"
+                        >
+                          <FontAwesomeIcon icon={faCheckCircle} />
+                        </button>
+                      )}
+                      <button 
+                        onClick={() => navigate(`/admin/blogs/${blog.id}/edit`)}
+                        className="p-1.5 text-blue-600 hover:bg-blue-100 rounded-md transition-colors" 
+                        title="Edit"
+                      >
+                        <FontAwesomeIcon icon={faPencil} />
                       </button>
-                      <button className="p-1.5 text-red-600 hover:bg-red-100 rounded-md transition-colors" title="Hapus">
-                        🗑️
+                      <button 
+                        onClick={() => deleteBlog(blog.id)}
+                        className="p-1.5 text-red-600 hover:bg-red-100 rounded-md transition-colors" 
+                        title="Hapus"
+                      >
+                        <FontAwesomeIcon icon={faTrash} />
                       </button>
                     </div>
                   </td>
                 </tr>
               ))}
             </tbody>
+            )}
           </table>
         </div>
       </div>

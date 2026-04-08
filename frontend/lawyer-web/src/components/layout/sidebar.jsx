@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import useAuth from '../../hooks/useAuth';
 
 // Direct imports are safer and support Tree Shaking
 // Note: If you are using the Free version, change 'pro-light' to 'free-solid'
@@ -24,6 +25,7 @@ import {
 const Sidebar = ({ isMobileOpen, setIsMobileOpen }) => {
   const location = useLocation();
   const navigate = useNavigate();
+  const { logout } = useAuth();
   const role = localStorage.getItem('role');
 
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -37,8 +39,7 @@ const Sidebar = ({ isMobileOpen, setIsMobileOpen }) => {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('role');
+    logout();
     navigate('/admin/login');
   };
 
