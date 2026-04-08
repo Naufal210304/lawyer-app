@@ -40,9 +40,10 @@ const Login = () => {
         password: password
       });
 
-      const { token, role } = response.data;
+      const { token, role, user } = response.data;
       localStorage.setItem('token', token);
       localStorage.setItem('role', role); // Menyimpan nama role (admin/superadmin)
+      localStorage.setItem('userId', user.id); // Simpan ID agar bisa dipakai saat buat Blog
       navigate('/admin/dashboard');
     } catch (err) {
       console.error("Detail Error Login:", err.response); // Cek console untuk melihat pesan dari server

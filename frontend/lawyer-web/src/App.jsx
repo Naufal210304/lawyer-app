@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from "react-router-dom";
 
 import Navbar from "./components/layout/Navbar";
 import Footer from "./components/layout/Footer";
@@ -16,14 +16,20 @@ import BlogDetail from "./pages/BlogDetail";
 import Login from "./pages/admin/Login";
 import Dashboard from "./pages/admin/Dashboard";
 import BlogManagement from "./pages/admin/Blog";
+import TeamManagement from "./pages/admin/Team";
+import ConsultationManagement from "./pages/admin/Consultation";
+import ReportManagement from "./pages/admin/Report";
+import PartnerManagement from "./pages/admin/Partners";
 import CreateBlog from "./pages/admin/CreateBlog";
+import PracticeAreaManagement from "./pages/admin/PracticeArea";
+import SettingsManagement from "./pages/admin/Settings";
 
 // AUTH
 import ProtectedRoute from "./components/ProtectedRoute";
 import AdminLayout from "./components/layout/Layout";
 
-// 🔥 Layout Wrapper (biar bisa pakai useLocation)
-const Layout = () => {
+// 🔥 GlobalWrapper (Rename dari Layout untuk menghindari konflik dengan AdminLayout)
+const AppContent = () => {
   const location = useLocation();
 
   // Cek apakah route admin
@@ -60,38 +66,95 @@ const Layout = () => {
           {/* ================= ADMIN ROUTES ================= */}
           <Route path="/admin/login" element={<Login />} />
 
+          {/* Admin Redirections */}
+          <Route
+            path="/admin"
+            element={<Navigate to="/admin/dashboard" replace />}
+          />
+          <Route
+            path="/admin/consultations"
+            element={<Navigate to="/admin/consultations/pending" replace />}
+          />
+
+          {/* Main Admin Pages */}
           <Route
             path="/admin/dashboard"
             element={
               <ProtectedRoute allowedRoles={["admin", "superadmin"]}>
-                <AdminLayout>
-                  <Dashboard />
-                </AdminLayout>
+                <AdminLayout><Dashboard /></AdminLayout>
               </ProtectedRoute>
             }
           />
-
+          <Route
+            path="/admin/consultations/pending"
+            element={
+              <ProtectedRoute allowedRoles={["admin", "superadmin"]}>
+                <AdminLayout><ConsultationManagement /></AdminLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/consultations/report"
+            element={
+              <ProtectedRoute allowedRoles={["admin", "superadmin"]}>
+                <AdminLayout><ReportManagement /></AdminLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/practice"
+            element={
+              <ProtectedRoute allowedRoles={["admin", "superadmin"]}>
+                <AdminLayout><PracticeAreaManagement /></AdminLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/partners"
+            element={
+              <ProtectedRoute allowedRoles={["admin", "superadmin"]}>
+                <AdminLayout><PartnerManagement /></AdminLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/team"
+            element={
+              <ProtectedRoute allowedRoles={["admin", "superadmin"]}>
+                <AdminLayout><TeamManagement /></AdminLayout>
+              </ProtectedRoute>
+            }
+          />
           <Route
             path="/admin/blogs"
             element={
               <ProtectedRoute allowedRoles={["admin", "superadmin"]}>
-                <AdminLayout>
-                  <BlogManagement />
-                </AdminLayout>
+                <AdminLayout><BlogManagement /></AdminLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/blogs/create"
+            element={
+              <ProtectedRoute allowedRoles={["admin", "superadmin"]}>
+                <AdminLayout><CreateBlog /></AdminLayout>
               </ProtectedRoute>
             }
           />
 
           <Route
-            path="/admin/blogs/create"
+            path="/admin/settings"
             element={
               <ProtectedRoute allowedRoles={["admin", "superadmin"]}>
                 <AdminLayout>
-                  <CreateBlog />
+                  <SettingsManagement />
                 </AdminLayout>
               </ProtectedRoute>
             }
           />
+
+          {/* 404 Catch All - Redirect ke Home atau Dashboard */}
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>
 
@@ -112,7 +175,7 @@ function App() {
 
   return (
     <Router>
-      <Layout />
+      <AppContent />
     </Router>
   );
 }

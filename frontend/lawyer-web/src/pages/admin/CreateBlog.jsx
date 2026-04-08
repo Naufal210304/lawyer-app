@@ -1,8 +1,12 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 const CreateBlog = () => {
   const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+
   const [formData, setFormData] = useState({
     title: '',
     slug: '',
@@ -32,12 +36,46 @@ const CreateBlog = () => {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Simulasi pengiriman data (Nantinya menggunakan FormData untuk upload file)
-    console.log('Data yang dikirim:', { ...formData, image });
-    alert('Artikel berhasil disimpan!');
-    navigate('/admin/blogs');
+    setIsLoading(true);
+    setError('');
+
+    try {
+      // Menyiapkan FormData karena ada file (image_url)
+      const data = new FormData();
+      data.append('title', formData.title);
+      data.append('slug', formData.slug);
+      data.append('category_id', formData.category_id);
+      data.append('type', formData.type);
+      data.append('status', formData.status);
+      data.append('content', formData.content);
+      
+      // Ambil author_id dari localStorage (pastikan di Login.jsx kamu menyimpannya)
+      // Jika belum ada, sementara kita hardcode '1' sesuai data dummy di Blog.jsx
+      const userId = localStorage.getItem('userId') || '1';
+      data.append('author_id', userId);
+
+      if (image) {
+        data.append('image', image);
+      }
+
+      const token = localStorage.getItem('token');
+      
+      await axios.post('http://localhost:3001/api/blogs', data, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      alert('Artikel berhasil dipublikasikan!');
+      navigate('/admin/blogs');
+    } catch (err) {
+      setError(err.response?.data?.message || 'Gagal menyimpan artikel. Coba lagi nanti.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -47,6 +85,12 @@ const CreateBlog = () => {
         <h1 className="text-2xl md:text-3xl font-bold text-slate-900 tracking-tight">Buat Artikel Baru</h1>
         <p className="text-slate-500 mt-1">Lengkapi form di bawah untuk mempublikasikan wawasan hukum baru.</p>
       </div>
+
+      {error && (
+        <div className="mb-6 p-4 bg-red-50 border border-red-200 text-red-600 rounded-lg text-sm font-medium">
+          {error}
+        </div>
+      )}
 
       <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Kolom Utama: Konten */}
@@ -164,10 +208,14 @@ const CreateBlog = () => {
 
           {/* Tombol Aksi */}
           <div className="flex flex-col gap-3 pt-2">
-            <button type="submit" className="w-full bg-blue-600 text-white font-bold py-4 rounded-xl shadow-lg shadow-blue-100 hover:bg-blue-700 hover:-translate-y-0.5 transition-all">
-              Simpan Artikel
+            <button 
+              type="submit" 
+              disabled={isLoading}
+              className={`w-full bg-blue-600 text-white font-bold py-4 rounded-xl shadow-lg shadow-blue-100 transition-all ${isLoading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-700 hover:-translate-y-0.5'}`}
+            >
+              {isLoading ? 'Sedang Memproses...' : 'Simpan Artikel'}
             </button>
-            <button type="button" onClick={() => navigate('/admin/blogs')} className="w-full bg-slate-100 text-slate-600 font-bold py-4 rounded-xl hover:bg-slate-200 transition-all">
+            <button type="button" disabled={isLoading} onClick={() => navigate('/admin/blogs')} className="w-full bg-slate-100 text-slate-600 font-bold py-4 rounded-xl hover:bg-slate-200 transition-all">
               Batal
             </button>
           </div>

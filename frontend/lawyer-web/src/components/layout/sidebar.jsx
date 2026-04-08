@@ -1,5 +1,25 @@
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+
+// Direct imports are safer and support Tree Shaking
+// Note: If you are using the Free version, change 'pro-light' to 'free-solid'
+// and the prefix from 'fal' to 'fas' in your mind (the icon names remain similar)
+import { 
+  faHouse, 
+  faNewspaper, 
+  faFileLines, 
+  faFileCirclePlus, 
+  faUsers, 
+  faComments, 
+  faGear,
+  faGlobe,
+  faDoorOpen,
+  faClock,
+  faChartLine,
+  faHandshake,
+  faScaleBalanced
+} from '@fortawesome/free-solid-svg-icons';
 
 const Sidebar = ({ isMobileOpen, setIsMobileOpen }) => {
   const location = useLocation();
@@ -26,46 +46,46 @@ const Sidebar = ({ isMobileOpen, setIsMobileOpen }) => {
     {
       name: "Dashboard",
       path: "/admin/dashboard",
-      icon: "🏠",
+      icon: faHouse,
       roles: ["admin", "superadmin"]
     },
     {
       name: "Manajemen Blog",
-      icon: "📝",
+      icon: faNewspaper,
       roles: ["admin", "superadmin"],
       subItems: [
-        { name: "Blog", path: "/admin/blogs" },
-        { name: "Create blog", path: "/admin/blogs/create" }
+        { name: "Blog", path: "/admin/blogs", icon: faFileLines },
+        { name: "Create blog", path: "/admin/blogs/create", icon: faFileCirclePlus }
       ]
     },
     {
       name: "Manajemen Team",
       path: "/admin/team",
-      icon: "👥",
+      icon: faUsers,
       roles: ["admin", "superadmin"]
     },
     {
       name: "Consultation",
-      icon: "💬",
+      icon: faComments,
       roles: ["admin", "superadmin"],
       subItems: [
-        { name: "Consultation Pending", path: "/admin/consultations/pending" },
-        { name: "Report", path: "/admin/consultations/report" }
+        { name: "Consultation Pending", path: "/admin/consultations/pending", icon: faClock },
+        { name: "Report", path: "/admin/consultations/report", icon: faChartLine }
       ]
     },
     {
       name: "Web Settings",
-      icon: "⚙️",
+      icon: faGlobe,
       roles: ["admin", "superadmin"],
       subItems: [
-        { name: "Partners", path: "/admin/partners" },
-        { name: "Practice Areas", path: "/admin/practice-areas" }
+        { name: "Partners", path: "/admin/partners", icon: faHandshake },
+        { name: "Practice Areas", path: "/admin/practice", icon: faScaleBalanced }
       ]
     },
     {
       name: "Settings",
       path: "/admin/settings",
-      icon: "⚙️",
+      icon: faGear,
       roles: ["admin", "superadmin"]
     }
   ];
@@ -131,7 +151,9 @@ const Sidebar = ({ isMobileOpen, setIsMobileOpen }) => {
                   className="w-full flex items-center justify-between px-3 md:px-4 py-2 md:py-3 rounded-lg hover:bg-blue-50 text-slate-700 hover:text-blue-600 transition-colors"
                 >
                   <div className="flex items-center gap-3">
-                    <span className="text-blue-600">{item.icon}</span>
+                    <span className="text-blue-600 w-5 flex justify-center">
+                      {typeof item.icon === 'string' ? item.icon : <FontAwesomeIcon icon={item.icon} />}
+                    </span>
                     {!isCollapsed && <span>{item.name}</span>}
                   </div>
 
@@ -155,7 +177,12 @@ const Sidebar = ({ isMobileOpen, setIsMobileOpen }) => {
                             : "text-slate-500 hover:text-blue-600"
                         }`}
                       >
-                        {sub.name}
+                        <div className="flex items-center gap-2">
+                          {sub.icon && (
+                            <FontAwesomeIcon icon={sub.icon} className="w-3.5 h-3.5" />
+                          )}
+                          <span>{sub.name}</span>
+                        </div>
                       </Link>
                     ))}
                   </div>
@@ -175,7 +202,9 @@ const Sidebar = ({ isMobileOpen, setIsMobileOpen }) => {
                   : "text-slate-600 hover:bg-blue-50 hover:text-blue-600"
               }`}
             >
-              <span className={isActive ? "text-white" : "text-blue-600"}>{item.icon}</span>
+              <span className={`${isActive ? "text-white" : "text-blue-600"} w-5 flex justify-center`}>
+                {typeof item.icon === 'string' ? item.icon : <FontAwesomeIcon icon={item.icon} />}
+              </span>
               {!isCollapsed && <span>{item.name}</span>}
             </Link>
           );
@@ -188,7 +217,7 @@ const Sidebar = ({ isMobileOpen, setIsMobileOpen }) => {
     onClick={handleLogout}
           className="w-full flex items-center gap-3 px-3 md:px-4 py-2 md:py-3 text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
   >
-          <span className="text-blue-600">🚪</span>
+          <span className="text-blue-600"><FontAwesomeIcon icon={faDoorOpen} /></span>
     {!isCollapsed && <span>Logout</span>}
   </button>
 </div>

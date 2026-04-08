@@ -49,7 +49,7 @@ const Dashboard = () => {
         {["Total Blog", "Konsultasi Pending", "Total Team", "Akun Pending"].map((title, i) => (
           <div key={i} className="bg-white p-4 md:p-6 rounded-xl shadow-sm border border-slate-200 hover:border-blue-300 transition-colors">
             <h3 className="text-gray-500 text-sm">{title}</h3>
-            <p className="text-xl md:text-2xl font-bold text-slate-900">{[24,8,12,3][i]}</p>
+            <p className="text-xl md:text-2xl font-bold text-slate-900">{[2, 2, 3, 2][i]}</p>
           </div>
         ))}
 
