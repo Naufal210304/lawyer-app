@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { useLocation } from 'react-router-dom';
+import axios from '../services/axios';
 import Button from '../components/ui/Button';
 import AboutBg from '../assets/About-bg.jpg';
 
@@ -17,12 +18,30 @@ const About = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Di sini kamu bisa menambahkan sanitasi data sebelum dikirim ke API
-    console.log("Data dikirim:", formData);
-    alert("Permintaan konsultasi telah dikirim!");
-    // Logika pengiriman ke backend menggunakan axios/fetch akan diletakkan di sini
+
+    try {
+      await axios.post('/consultations', {
+        full_name: formData.fullName,
+        phone_number: formData.phoneNumber,
+        email: formData.email,
+        service_area: formData.serviceArea,
+        problem_details: formData.problemDetails,
+      });
+
+      alert('Permintaan konsultasi telah dikirim! Kami akan menindaklanjuti secepatnya.');
+      setFormData({
+        fullName: '',
+        phoneNumber: '',
+        email: '',
+        serviceArea: '',
+        problemDetails: ''
+      });
+    } catch (error) {
+      console.error('Error submitting consultation:', error);
+      alert('Gagal mengirim permintaan konsultasi. Silakan coba lagi.');
+    }
   };
 
   useEffect(() => {

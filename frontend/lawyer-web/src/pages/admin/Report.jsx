@@ -1,31 +1,29 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from '../../services/axios';
 
 const Report = () => {
   const [selectedConsultation, setSelectedConsultation] = useState(null);
+  const [reports, setReports] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // Data Dummy untuk Riwayat (History) Konsultasi
-  const [reports] = useState([
-    {
-      id: 1,
-      full_name: "Antoni Wijaya",
-      phone_number: "081222333444",
-      email: "antoni@example.com",
-      service_area: "Hukum Pidana",
-      problem_details: "Klien meminta pendampingan terkait kasus dugaan pencemaran nama baik di media sosial yang melibatkan pasal ITE.",
-      status: "Approved",
-      handled_at: "2023-11-20 10:00"
-    },
-    {
-      id: 2,
-      full_name: "Siska Putri",
-      phone_number: "085566677788",
-      email: "siska@example.com",
-      service_area: "Hukum Keluarga",
-      problem_details: "Konsultasi mengenai hak asuh anak setelah perceraian yang terjadi 3 tahun lalu karena pihak mantan suami menghalangi pertemuan.",
-      status: "Rejected",
-      handled_at: "2023-11-21 14:30"
+  useEffect(() => {
+    fetchReports();
+  }, []);
+
+  const fetchReports = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get('/reports');
+      setReports(response.data.data || []);
+      setError(null);
+    } catch (err) {
+      setError('Failed to load reports');
+      console.error(err);
+    } finally {
+      setLoading(false);
     }
-  ]);
+  };
 
   const closeModal = () => setSelectedConsultation(null);
 
@@ -39,60 +37,89 @@ const Report = () => {
         </p>
       </div>
 
-      {/* Table Section */}
-      <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-        <div className="p-4 border-b border-slate-50 bg-slate-50/30 flex justify-between items-center">
-          <h2 className="font-bold text-slate-700">History Log</h2>
-          <button className="text-xs bg-emerald-600 text-white px-3 py-1.5 rounded font-bold hover:bg-emerald-700 transition-colors">
-            📥 Export Excel
+      {/* Loading State */}
+      {loading && (
+        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-8 text-center">
+          <p className="text-gray-600">Loading reports...</p>
+        </div>
+      )}
+
+      {/* Error State */}
+      {error && (
+        <div className="bg-red-50 border border-red-200 rounded-xl p-4">
+          <p className="text-red-700 font-semibold">{error}</p>
+          <button 
+            onClick={fetchReports}
+            className="mt-2 text-xs bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700"
+          >
+            Retry
           </button>
         </div>
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead className="bg-slate-50 text-slate-600 text-xs uppercase font-semibold">
-              <tr>
-                <th className="px-6 py-4 border-b">Nama Lengkap</th>
-                <th className="px-6 py-4 border-b">No. Handphone</th>
-                <th className="px-6 py-4 border-b">Email</th>
-                <th className="px-6 py-4 border-b">Bidang</th>
-                <th className="px-6 py-4 border-b">Status</th>
-                <th className="px-6 py-4 border-b">Tanggal Proses</th>
-                <th className="px-6 py-4 border-b text-center">Aksi</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100 text-sm">
-              {reports.map((item) => (
-                <tr key={item.id} className="hover:bg-slate-50/50 transition-colors">
-                  <td className="px-6 py-4 font-bold text-slate-900">{item.full_name}</td>
-                  <td className="px-6 py-4 text-slate-600">{item.phone_number}</td>
-                  <td className="px-6 py-4 text-slate-600">{item.email}</td>
-                  <td className="px-6 py-4">
-                    <span className="text-[11px] font-medium text-slate-500">{item.service_area}</span>
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className={`px-2 py-1 rounded text-[10px] font-bold uppercase ${
-                      item.status === 'Approved' 
-                      ? 'bg-green-100 text-green-700 border border-green-200' 
-                      : 'bg-red-100 text-red-700 border border-red-200'
-                    }`}>
-                      {item.status}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-slate-400 text-xs">{item.handled_at}</td>
-                  <td className="px-6 py-4 text-center">
-                    <button 
-                      onClick={() => setSelectedConsultation(item)}
-                      className="text-blue-600 hover:underline font-bold text-xs"
-                    >
-                      Detail Deskripsi
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+      )}
+
+      {/* Empty State */}
+      {!loading && reports.length === 0 && !error && (
+        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-8 text-center">
+          <p className="text-gray-600">No reports available</p>
         </div>
-      </div>
+      )}
+
+      {/* Table Section */}
+      {!loading && reports.length > 0 && (
+        <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+          <div className="p-4 border-b border-slate-50 bg-slate-50/30 flex justify-between items-center">
+            <h2 className="font-bold text-slate-700">History Log</h2>
+            <button className="text-xs bg-emerald-600 text-white px-3 py-1.5 rounded font-bold hover:bg-emerald-700 transition-colors">
+              📥 Export Excel
+            </button>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead className="bg-slate-50 text-slate-600 text-xs uppercase font-semibold">
+                <tr>
+                  <th className="px-6 py-4 border-b">Nama Lengkap</th>
+                  <th className="px-6 py-4 border-b">No. Handphone</th>
+                  <th className="px-6 py-4 border-b">Email</th>
+                  <th className="px-6 py-4 border-b">Bidang</th>
+                  <th className="px-6 py-4 border-b">Status</th>
+                  <th className="px-6 py-4 border-b">Tanggal Proses</th>
+                  <th className="px-6 py-4 border-b text-center">Aksi</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100 text-sm">
+                {reports.map((item) => (
+                  <tr key={item.id} className="hover:bg-slate-50/50 transition-colors">
+                    <td className="px-6 py-4 font-bold text-slate-900">{item.full_name}</td>
+                    <td className="px-6 py-4 text-slate-600">{item.phone_number}</td>
+                    <td className="px-6 py-4 text-slate-600">{item.email}</td>
+                    <td className="px-6 py-4">
+                      <span className="text-[11px] font-medium text-slate-500">{item.service_area}</span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className={`px-2 py-1 rounded text-[10px] font-bold uppercase ${
+                        item.status === 'Approved' 
+                        ? 'bg-green-100 text-green-700 border border-green-200' 
+                        : 'bg-red-100 text-red-700 border border-red-200'
+                      }`}>
+                        {item.status}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-slate-400 text-xs">{item.created_at || item.updated_at}</td>
+                    <td className="px-6 py-4 text-center">
+                      <button 
+                        onClick={() => setSelectedConsultation(item)}
+                        className="text-blue-600 hover:underline font-bold text-xs"
+                      >
+                        Detail Deskripsi
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
 
       {/* Modal Detail (Sama dengan Pending agar konsisten) */}
       {selectedConsultation && (

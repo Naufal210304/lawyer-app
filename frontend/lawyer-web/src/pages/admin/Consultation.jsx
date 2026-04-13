@@ -1,29 +1,58 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from '../../services/axios';
 
 const Consultation = () => {
   const [selectedConsultation, setSelectedConsultation] = useState(null);
-  
-  // Data Dummy (Nantinya di-fetch dari tabel 'consultations')
-  const [consultations] = useState([
-    {
-      id: 1,
-      full_name: "Budi Santoso",
-      phone_number: "081234567890",
-      email: "budi@mail.com",
-      service_area: "Hukum Korporasi",
-      problem_details: "Saya sedang berencana mendirikan startup di bidang fintech dan membutuhkan panduan mendalam mengenai regulasi OJK serta penyusunan Akta Pendirian Perusahaan yang sesuai dengan standar hukum terbaru di Indonesia.",
-      created_at: "2023-10-25 09:15"
-    },
-    {
-      id: 2,
-      full_name: "Siti Aminah",
-      phone_number: "089876543210",
-      email: "siti@mail.com",
-      service_area: "Hukum Keluarga",
-      problem_details: "Ingin berkonsultasi mengenai pembagian harta gono-gini setelah perceraian yang sudah diputus 2 tahun lalu namun belum ada kesepakatan tertulis antar pihak. Saya ingin tahu langkah hukum apa yang bisa diambil.",
-      created_at: "2023-10-26 14:30"
+  const [consultations, setConsultations] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [actionLoading, setActionLoading] = useState(null);
+
+  useEffect(() => {
+    fetchConsultations();
+  }, []);
+
+  const fetchConsultations = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get('/consultations');
+      setConsultations(response.data.data || []);
+      setError(null);
+    } catch (err) {
+      setError('Failed to load consultations');
+      console.error(err);
+    } finally {
+      setLoading(false);
     }
-  ]);
+  };
+
+  const handleApprove = async (id) => {
+    try {
+      setActionLoading(id);
+      await axios.put(`/consultations/${id}/approve`);
+      setConsultations(consultations.filter(c => c.id !== id));
+      setSelectedConsultation(null);
+      alert('Consultation approved and moved to report');
+    } catch (err) {
+      alert('Failed to approve: ' + (err.response?.data?.message || err.message));
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const handleReject = async (id) => {
+    try {
+      setActionLoading(id);
+      await axios.put(`/consultations/${id}/reject`);
+      setConsultations(consultations.filter(c => c.id !== id));
+      setSelectedConsultation(null);
+      alert('Consultation rejected and moved to report');
+    } catch (err) {
+      alert('Failed to reject: ' + (err.response?.data?.message || err.message));
+    } finally {
+      setActionLoading(null);
+    }
+  };
 
   const closeModal = () => setSelectedConsultation(null);
 
@@ -37,48 +66,77 @@ const Consultation = () => {
         </p>
       </div>
 
-      {/* Table Section */}
-      <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead className="bg-slate-50 text-slate-600 text-xs uppercase font-semibold">
-              <tr>
-                <th className="px-6 py-4 border-b">Nama Lengkap</th>
-                <th className="px-6 py-4 border-b">No. Handphone</th>
-                <th className="px-6 py-4 border-b">Email</th>
-                <th className="px-6 py-4 border-b">Bidang Layanan</th>
-                <th className="px-6 py-4 border-b">Deskripsi</th>
-                <th className="px-6 py-4 border-b text-center">Aksi</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100 text-sm">
-              {consultations.map((item) => (
-                <tr key={item.id} className="hover:bg-slate-50/50 transition-colors">
-                  <td className="px-6 py-4 font-bold text-slate-900">{item.full_name}</td>
-                  <td className="px-6 py-4 text-slate-600">{item.phone_number}</td>
-                  <td className="px-6 py-4 text-slate-600">{item.email}</td>
-                  <td className="px-6 py-4">
-                    <span className="px-2 py-1 bg-blue-50 text-blue-700 rounded text-[10px] font-bold uppercase border border-blue-100">
-                      {item.service_area}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-slate-500 max-w-[200px] truncate">
-                    {item.problem_details}
-                  </td>
-                  <td className="px-6 py-4 text-center">
-                    <button 
-                      onClick={() => setSelectedConsultation(item)}
-                      className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded text-xs font-bold transition-all shadow-sm"
-                    >
-                      Detail
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+      {/* Loading State */}
+      {loading && (
+        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-8 text-center">
+          <p className="text-gray-600">Loading consultations...</p>
         </div>
-      </div>
+      )}
+
+      {/* Error State */}
+      {error && (
+        <div className="bg-red-50 border border-red-200 rounded-xl p-4">
+          <p className="text-red-700 font-semibold">{error}</p>
+          <button 
+            onClick={fetchConsultations}
+            className="mt-2 text-xs bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700"
+          >
+            Retry
+          </button>
+        </div>
+      )}
+
+      {/* Empty State */}
+      {!loading && consultations.length === 0 && !error && (
+        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-8 text-center">
+          <p className="text-gray-600">No pending consultations</p>
+        </div>
+      )}
+
+      {/* Table Section */}
+      {!loading && consultations.length > 0 && (
+        <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead className="bg-slate-50 text-slate-600 text-xs uppercase font-semibold">
+                <tr>
+                  <th className="px-6 py-4 border-b">Nama Lengkap</th>
+                  <th className="px-6 py-4 border-b">No. Handphone</th>
+                  <th className="px-6 py-4 border-b">Email</th>
+                  <th className="px-6 py-4 border-b">Bidang Layanan</th>
+                  <th className="px-6 py-4 border-b">Deskripsi</th>
+                  <th className="px-6 py-4 border-b text-center">Aksi</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100 text-sm">
+                {consultations.map((item) => (
+                  <tr key={item.id} className="hover:bg-slate-50/50 transition-colors">
+                    <td className="px-6 py-4 font-bold text-slate-900">{item.full_name}</td>
+                    <td className="px-6 py-4 text-slate-600">{item.phone_number}</td>
+                    <td className="px-6 py-4 text-slate-600">{item.email}</td>
+                    <td className="px-6 py-4">
+                      <span className="px-2 py-1 bg-blue-50 text-blue-700 rounded text-[10px] font-bold uppercase border border-blue-100">
+                        {item.service_area}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-slate-500 max-w-[200px] truncate">
+                      {item.problem_details}
+                    </td>
+                    <td className="px-6 py-4 text-center">
+                      <button 
+                        onClick={() => setSelectedConsultation(item)}
+                        className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded text-xs font-bold transition-all shadow-sm"
+                      >
+                        Detail
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
 
       {/* Modal Detail Deskripsi */}
       {selectedConsultation && (
@@ -106,12 +164,26 @@ const Consultation = () => {
                 </div>
               </div>
             </div>
-            <div className="p-6 bg-slate-50 flex justify-end">
+            <div className="p-6 bg-slate-50 flex gap-3 justify-end">
               <button 
                 onClick={closeModal}
                 className="px-6 py-2 bg-white border border-slate-200 hover:bg-slate-100 text-slate-600 rounded-lg text-sm font-bold transition-all"
               >
                 Tutup
+              </button>
+              <button 
+                onClick={() => handleReject(selectedConsultation.id)}
+                disabled={actionLoading === selectedConsultation.id}
+                className="px-6 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-bold transition-all disabled:opacity-50"
+              >
+                {actionLoading === selectedConsultation.id ? 'Processing...' : 'Reject'}
+              </button>
+              <button 
+                onClick={() => handleApprove(selectedConsultation.id)}
+                disabled={actionLoading === selectedConsultation.id}
+                className="px-6 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-bold transition-all disabled:opacity-50"
+              >
+                {actionLoading === selectedConsultation.id ? 'Processing...' : 'Approve'}
               </button>
             </div>
           </div>
