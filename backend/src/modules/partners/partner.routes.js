@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const userController = require('./user.controller');
+const partnerController = require('./partner.controller');
 const authMiddleware = require('../../middlewares/auth.middleware');
 const multer = require('multer');
 const path = require('path');
@@ -11,7 +11,7 @@ const storage = multer.diskStorage({
   },
   filename: (req, file, cb) => {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-    cb(null, 'profile-' + uniqueSuffix + path.extname(file.originalname));
+    cb(null, 'partner-' + uniqueSuffix + path.extname(file.originalname));
   }
 });
 
@@ -29,18 +29,20 @@ const upload = multer({
     }
     cb(new Error('Only image files are allowed!'));
   }
-}).single('profile_pic');
+}).single('logo');
 
-// semua butuh login
 router.use(authMiddleware);
 
-// GET all users
-router.get('/', userController.getAllUsers);
-
-// GET user by id
-router.get('/:id', userController.getUserById);
-
-// PUT update user profile
+router.get('/', partnerController.getAllPartners);
+router.get('/:id', partnerController.getPartnerById);
+router.post('/', (req, res, next) => {
+  upload(req, res, (err) => {
+    if (err) {
+      return res.status(400).json({ message: err.message });
+    }
+    next();
+  });
+}, partnerController.createPartner);
 router.put('/:id', (req, res, next) => {
   upload(req, res, (err) => {
     if (err) {
@@ -48,12 +50,7 @@ router.put('/:id', (req, res, next) => {
     }
     next();
   });
-}, userController.updateUser);
-
-// PUT update password
-router.put('/:id/password', userController.updatePassword);
-
-// DELETE user
-router.delete('/:id', userController.deleteUser);
+}, partnerController.updatePartner);
+router.delete('/:id', partnerController.deletePartner);
 
 module.exports = router;

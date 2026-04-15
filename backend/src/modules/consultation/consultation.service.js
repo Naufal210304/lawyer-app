@@ -67,6 +67,16 @@ const getReportById = async (id) => {
   return reportModel.getReportById(id);
 };
 
+const deleteReport = async (id) => {
+  const deletedRows = await reportModel.deleteReport(id);
+  if (!deletedRows) {
+    const error = new Error('Report not found');
+    error.statusCode = 404;
+    throw error;
+  }
+  return true;
+};
+
 module.exports = {
   createConsultation,
   getPendingConsultations,
@@ -75,4 +85,5 @@ module.exports = {
   rejectConsultation,
   getReports,
   getReportById,
+  deleteReport,
 };

@@ -45,7 +45,7 @@ const getConsultationById = async (req, res, next) => {
 
 const approveConsultation = async (req, res, next) => {
   try {
-    const report = await consultationService.approveConsultation(req.params.id, req.body.admin_notes);
+    const report = await consultationService.approveConsultation(req.params.id, req.body?.admin_notes || null);
     res.json({ success: true, message: 'Consultation approved and moved to report', data: report });
   } catch (error) {
     next(error);
@@ -54,7 +54,7 @@ const approveConsultation = async (req, res, next) => {
 
 const rejectConsultation = async (req, res, next) => {
   try {
-    const report = await consultationService.rejectConsultation(req.params.id, req.body.admin_notes);
+    const report = await consultationService.rejectConsultation(req.params.id, req.body?.admin_notes || null);
     res.json({ success: true, message: 'Consultation rejected and moved to report', data: report });
   } catch (error) {
     next(error);

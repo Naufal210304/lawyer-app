@@ -26,4 +26,13 @@ router.get('/:id', async (req, res, next) => {
   }
 });
 
+router.delete('/:id', async (req, res, next) => {
+  try {
+    await reportService.deleteReport(req.params.id);
+    res.json({ success: true, message: 'Report deleted successfully' });
+  } catch (error) {
+    next(error);
+  }
+});
+
 module.exports = router;

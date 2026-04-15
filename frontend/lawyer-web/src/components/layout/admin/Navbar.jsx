@@ -3,6 +3,7 @@ import React from "react";
 const Navbar = ({ setIsMobileOpen }) => {
   const role = localStorage.getItem("role") || "user";
   const username = localStorage.getItem("username") || "Admin";
+  const profilePic = localStorage.getItem("profile_pic");
 
   return (
     <div className="h-16 bg-white shadow flex items-center justify-between px-4 md:px-6">
@@ -27,7 +28,15 @@ const Navbar = ({ setIsMobileOpen }) => {
           {username} ({role})
         </span>
 
-        <div className="w-7 h-7 md:w-8 md:h-8 bg-gray-300 rounded-full"></div>
+        <div className="w-7 h-7 md:w-8 md:h-8 bg-gray-300 rounded-full overflow-hidden flex items-center justify-center">
+          {profilePic ? (
+            <img src={profilePic} alt="Profile" className="w-full h-full object-cover" />
+          ) : (
+            <span className="text-white font-bold text-sm uppercase">
+              {username.charAt(0)}
+            </span>
+          )}
+        </div>
       </div>
 
     </div>

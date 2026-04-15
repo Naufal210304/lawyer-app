@@ -10,11 +10,9 @@ const errorHandler = require('./middlewares/error.middleware');
 
 // Middleware
 app.use(cors({
-  origin: 'http://localhost:5173',
+  origin: ['http://localhost:5173', 'http://localhost:5174'],
 }));
-
-// Note: Removed express.json() to avoid conflicts with multipart/form-data
-// JSON parsing will be handled per route as needed
+app.use(express.json());
 
 // Central routing
 app.use('/api', routes);

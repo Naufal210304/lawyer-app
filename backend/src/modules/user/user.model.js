@@ -37,7 +37,7 @@ const findUserByEmail = (email) => {
 // GET ALL USERS
 const getAllUsers = () => {
   return new Promise((resolve, reject) => {
-    const query = 'SELECT id, username, email, role_id FROM users';
+    const query = 'SELECT id, username, email, phone_number, profile_pic, role_id FROM users';
 
     db.query(query, (err, results) => {
       if (err) return reject(err);
@@ -49,7 +49,7 @@ const getAllUsers = () => {
 // GET USER BY ID
 const getUserById = (id) => {
   return new Promise((resolve, reject) => {
-    const query = 'SELECT id, username, email, role_id FROM users WHERE id = ?';
+    const query = 'SELECT id, username, email, phone_number, profile_pic, role_id FROM users WHERE id = ?';
 
     db.query(query, [id], (err, results) => {
       if (err) return reject(err);
@@ -58,12 +58,29 @@ const getUserById = (id) => {
   });
 };
 
-// DELETE USER
-const deleteUser = (id) => {
+// UPDATE USER
+const updateUser = (id, userData) => {
   return new Promise((resolve, reject) => {
-    const query = 'DELETE FROM users WHERE id = ?';
+    const { username, email, phone_number, profile_pic } = userData;
 
-    db.query(query, [id], (err, result) => {
+    const query = `
+      UPDATE users
+      SET username = ?, email = ?, phone_number = ?, profile_pic = ?
+      WHERE id = ?
+    `;
+
+    db.query(query, [username, email, phone_number || null, profile_pic || null, id], (err, result) => {
+      if (err) return reject(err);
+      resolve(result);
+    });
+  });
+};
+
+// UPDATE USER PASSWORD
+const updateUserPassword = (id, hashedPassword) => {
+  return new Promise((resolve, reject) => {
+    const query = 'UPDATE users SET password = ? WHERE id = ?';
+    db.query(query, [hashedPassword, id], (err, result) => {
       if (err) return reject(err);
       resolve(result);
     });
@@ -73,20 +90,22 @@ const deleteUser = (id) => {
 // ➕ Create user
 const createUser = (userData) => {
   return new Promise((resolve, reject) => {
-    const { username, email, password, role_id } = userData;
+    const { username, email, password, phone_number, profile_pic, role_id } = userData;
 
     const query = `
-      INSERT INTO users (username, email, password, role_id)
-      VALUES (?, ?, ?, ?)
+      INSERT INTO users (username, email, password, phone_number, profile_pic, role_id)
+      VALUES (?, ?, ?, ?, ?, ?)
     `;
 
-    db.query(query, [username, email, password, role_id], (err, result) => {
+    db.query(query, [username, email, password, phone_number || null, profile_pic || null, role_id], (err, result) => {
       if (err) return reject(err); // ✅ FIX
 
       resolve({
         id: result.insertId,
         username,
         email,
+        phone_number: phone_number || null,
+        profile_pic: profile_pic || null,
         role_id
       });
     });
@@ -212,9 +231,10 @@ module.exports = {
   findUserByEmail,
   findPendingUserByEmail,
   createUser,
+  updateUser,
+  updateUserPassword,
   getAllUsers,
   getUserById,
-  deleteUser,
   getPendingUsers,
   getPendingUserById,
   createPendingUser,

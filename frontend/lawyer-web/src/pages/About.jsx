@@ -40,7 +40,8 @@ const About = () => {
       });
     } catch (error) {
       console.error('Error submitting consultation:', error);
-      alert('Gagal mengirim permintaan konsultasi. Silakan coba lagi.');
+      const message = error.response?.data?.message || error.message || 'Gagal mengirim permintaan konsultasi. Silakan coba lagi.';
+      alert(message);
     }
   };
 

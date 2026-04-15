@@ -19,8 +19,9 @@ const Consultation = () => {
       setConsultations(response.data.data || []);
       setError(null);
     } catch (err) {
-      setError('Failed to load consultations');
-      console.error(err);
+      const message = err.response?.data?.message || 'Failed to load consultations';
+      setError(message);
+      console.error('Consultation fetch error:', err);
     } finally {
       setLoading(false);
     }
@@ -29,7 +30,7 @@ const Consultation = () => {
   const handleApprove = async (id) => {
     try {
       setActionLoading(id);
-      await axios.put(`/consultations/${id}/approve`);
+      await axios.put(`/consultations/${id}/approve`, {});
       setConsultations(consultations.filter(c => c.id !== id));
       setSelectedConsultation(null);
       alert('Consultation approved and moved to report');
@@ -43,7 +44,7 @@ const Consultation = () => {
   const handleReject = async (id) => {
     try {
       setActionLoading(id);
-      await axios.put(`/consultations/${id}/reject`);
+      await axios.put(`/consultations/${id}/reject`, {});
       setConsultations(consultations.filter(c => c.id !== id));
       setSelectedConsultation(null);
       alert('Consultation rejected and moved to report');
@@ -123,12 +124,28 @@ const Consultation = () => {
                       {item.problem_details}
                     </td>
                     <td className="px-6 py-4 text-center">
-                      <button 
-                        onClick={() => setSelectedConsultation(item)}
-                        className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded text-xs font-bold transition-all shadow-sm"
-                      >
-                        Detail
-                      </button>
+                      <div className="flex gap-2 justify-center">
+                        <button 
+                          onClick={() => setSelectedConsultation(item)}
+                          className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded text-xs font-bold transition-all shadow-sm"
+                        >
+                          Detail
+                        </button>
+                        <button 
+                          onClick={() => handleApprove(item.id)}
+                          disabled={actionLoading === item.id}
+                          className="bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded text-xs font-bold transition-all shadow-sm disabled:opacity-50"
+                        >
+                          {actionLoading === item.id ? '...' : 'Approve'}
+                        </button>
+                        <button 
+                          onClick={() => handleReject(item.id)}
+                          disabled={actionLoading === item.id}
+                          className="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded text-xs font-bold transition-all shadow-sm disabled:opacity-50"
+                        >
+                          {actionLoading === item.id ? '...' : 'Reject'}
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}

@@ -1,26 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from '../../services/axios';
 
 const PracticeArea = () => {
-  // Data Dummy sesuai tabel 'practice_areas' dan data di client side
-  const [practiceAreas, setPracticeAreas] = useState([
-    { 
-      id: 1,
-      slug: "korporasi",
-      title: "Hukum Korporasi", 
-      description: "Solusi legal menyeluruh untuk kebutuhan bisnis dan regulasi perusahaan Anda.",
-      detail: "Layanan ini mencakup pendampingan hukum dalam pendirian badan usaha, penyusunan kontrak komersial, merger dan akuisisi, hingga kepatuhan regulasi industri.",
-      cases_example: "Contoh Kasus: Sengketa antar pemegang saham, peninjauan kontrak vendor skala besar, dan restrukturisasi perusahaan."
-    },
-    { 
-      id: 2,
-      slug: "pidana",
-      title: "Hukum Pidana", 
-      description: "Pembelaan hukum yang tangguh and strategis untuk melindungi hak-hak Anda.",
-      detail: "Kami memberikan pendampingan hukum mulai dari tingkat penyelidikan di Kepolisian, penyidikan di Kejaksaan, hingga proses persidangan di Pengadilan.",
-      cases_example: "Contoh Kasus: Pembelaan dalam kasus dugaan penipuan/penggelapan, tindak pidana korupsi, dan pencemaran nama baik di media digital."
-    }
-  ]);
-
+  const [practiceAreas, setPracticeAreas] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState({
     title: '',
@@ -29,6 +11,26 @@ const PracticeArea = () => {
     detail: '',
     cases_example: ''
   });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    fetchPracticeAreas();
+  }, []);
+
+  const fetchPracticeAreas = async () => {
+    setLoading(true);
+    try {
+      const response = await axios.get('/practice-areas');
+      setPracticeAreas(response.data.data || []);
+      setError(null);
+    } catch (err) {
+      console.error(err);
+      setError('Failed to load practice areas');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Auto-generate slug dari judul
   const handleTitleChange = (e) => {
@@ -40,17 +42,33 @@ const PracticeArea = () => {
     setFormData({ ...formData, title, slug });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const id = Date.now();
-    setPracticeAreas([...practiceAreas, { ...formData, id }]);
-    setIsModalOpen(false);
-    setFormData({ title: '', slug: '', description: '', detail: '', cases_example: '' });
+
+    if (!formData.title.trim() || !formData.slug.trim() || !formData.description.trim()) {
+      return alert('Judul, slug, dan deskripsi wajib diisi.');
+    }
+
+    try {
+      const response = await axios.post('/practice-areas', formData);
+      setPracticeAreas([...practiceAreas, response.data.data]);
+      setIsModalOpen(false);
+      setFormData({ title: '', slug: '', description: '', detail: '', cases_example: '' });
+    } catch (err) {
+      console.error(err);
+      alert(err.response?.data?.message || 'Failed to create practice area');
+    }
   };
 
-  const handleDelete = (id) => {
-    if (window.confirm('Hapus bidang layanan ini dari website?')) {
+  const handleDelete = async (id) => {
+    if (!window.confirm('Hapus bidang layanan ini dari website?')) return;
+
+    try {
+      await axios.delete(`/practice-areas/${id}`);
       setPracticeAreas(practiceAreas.filter(area => area.id !== id));
+    } catch (err) {
+      console.error(err);
+      alert(err.response?.data?.message || 'Failed to delete practice area');
     }
   };
 
@@ -83,21 +101,35 @@ const PracticeArea = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 text-sm">
-              {practiceAreas.map((area) => (
-                <tr key={area.id} className="hover:bg-slate-50/50 transition-colors">
-                  <td className="px-6 py-4 font-bold text-slate-900">{area.title}</td>
-                  <td className="px-6 py-4 font-mono text-xs text-slate-400">/{area.slug}</td>
-                  <td className="px-6 py-4 text-slate-500 max-w-xs truncate">{area.description}</td>
-                  <td className="px-6 py-4 text-right">
-                    <button 
-                      onClick={() => handleDelete(area.id)}
-                      className="text-slate-400 hover:text-red-600 transition-colors p-2"
-                    >
-                      🗑️
-                    </button>
+              {loading ? (
+                <tr>
+                  <td colSpan="4" className="py-20 text-center text-slate-400 italic">
+                    Loading practice areas...
                   </td>
                 </tr>
-              ))}
+              ) : practiceAreas.length > 0 ? (
+                practiceAreas.map((area) => (
+                  <tr key={area.id} className="hover:bg-slate-50/50 transition-colors">
+                    <td className="px-6 py-4 font-bold text-slate-900">{area.title}</td>
+                    <td className="px-6 py-4 font-mono text-xs text-slate-400">/{area.slug}</td>
+                    <td className="px-6 py-4 text-slate-500 max-w-xs truncate">{area.description}</td>
+                    <td className="px-6 py-4 text-right">
+                      <button 
+                        onClick={() => handleDelete(area.id)}
+                        className="text-slate-400 hover:text-red-600 transition-colors p-2"
+                      >
+                        🗑️
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="4" className="py-20 text-center text-slate-400 italic">
+                    Belum ada bidang layanan yang ditambahkan.
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>

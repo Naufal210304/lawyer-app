@@ -1,36 +1,79 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from '../../services/axios';
 
 const Partners = () => {
-  // Data Dummy sesuai tabel 'partners' di database
-  const [partners, setPartners] = useState([
-    { id: 1, name: "Global Tech Solutions", logo_url: "https://via.placeholder.com/150?text=Logo+1", category: "strategic" },
-    { id: 2, name: "Mega Finance Group", logo_url: "https://via.placeholder.com/150?text=Logo+2", category: "corporate" },
-  ]);
-
+  const [partners, setPartners] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newPartner, setNewPartner] = useState({ name: '', category: 'strategic' });
   const [preview, setPreview] = useState(null);
+  const [file, setFile] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setPreview(URL.createObjectURL(file));
+  useEffect(() => {
+    fetchPartners();
+  }, []);
+
+  const fetchPartners = async () => {
+    setLoading(true);
+    try {
+      const response = await axios.get('/partners');
+      setPartners(response.data.data || []);
+      setError(null);
+    } catch (err) {
+      console.error(err);
+      setError('Failed to load partners');
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    // Simulasi penambahan data
-    const id = Date.now();
-    setPartners([...partners, { ...newPartner, id, logo_url: preview || "https://via.placeholder.com/150" }]);
-    setIsModalOpen(false);
-    setNewPartner({ name: '', category: 'strategic' });
-    setPreview(null);
+  const handleImageChange = (e) => {
+    const selectedFile = e.target.files[0];
+    if (selectedFile) {
+      setPreview(URL.createObjectURL(selectedFile));
+      setFile(selectedFile);
+    }
   };
 
-  const handleDelete = (id) => {
-    if (window.confirm('Hapus partner ini dari daftar?')) {
-      setPartners(partners.filter(p => p.id !== id));
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!newPartner.name.trim()) {
+      return alert('Nama partner harus diisi.');
+    }
+
+    const formData = new FormData();
+    formData.append('name', newPartner.name.trim());
+    formData.append('category', newPartner.category);
+    if (file) {
+      formData.append('logo', file);
+    }
+
+    try {
+      const response = await axios.post('/partners', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      setPartners((prev) => [...prev, response.data.data]);
+      setIsModalOpen(false);
+      setNewPartner({ name: '', category: 'strategic' });
+      setPreview(null);
+      setFile(null);
+    } catch (err) {
+      console.error(err);
+      alert(err.response?.data?.message || 'Failed to create partner');
+    }
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm('Hapus partner ini dari daftar?')) return;
+
+    try {
+      await axios.delete(`/partners/${id}`);
+      setPartners((prev) => prev.filter((partner) => partner.id !== id));
+    } catch (err) {
+      console.error(err);
+      alert(err.response?.data?.message || 'Failed to delete partner');
     }
   };
 
@@ -63,41 +106,50 @@ const Partners = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 text-sm">
-              {partners.map((partner) => (
-                <tr key={partner.id} className="hover:bg-slate-50/50 transition-colors">
-                  <td className="px-6 py-4">
-                    <div className="h-12 w-24 bg-white border border-slate-100 rounded flex items-center justify-center p-2">
-                      <img src={partner.logo_url} alt={partner.name} className="max-h-full max-w-full object-contain" />
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 font-bold text-slate-900">{partner.name}</td>
-                  <td className="px-6 py-4">
-                    <span className={`px-2.5 py-1 rounded text-[10px] font-bold uppercase ${
-                      partner.category === 'strategic' 
-                      ? 'bg-purple-100 text-purple-700 border border-purple-200' 
-                      : 'bg-emerald-100 text-emerald-700 border border-emerald-200'
-                    }`}>
-                      {partner.category}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-right">
-                    <button 
-                      onClick={() => handleDelete(partner.id)}
-                      className="text-slate-400 hover:text-red-600 transition-colors p-2 text-lg"
-                      title="Hapus Partner"
-                    >
-                      🗑️
-                    </button>
+              {loading ? (
+                <tr>
+                  <td colSpan="4" className="py-20 text-center text-slate-400 italic">
+                    Loading partners...
                   </td>
                 </tr>
-              ))}
+              ) : partners.length > 0 ? (
+                partners.map((partner) => (
+                  <tr key={partner.id} className="hover:bg-slate-50/50 transition-colors">
+                    <td className="px-6 py-4">
+                      <div className="h-12 w-24 bg-white border border-slate-100 rounded flex items-center justify-center p-2">
+                        <img src={partner.logo_url} alt={partner.name} className="max-h-full max-w-full object-contain" />
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 font-bold text-slate-900">{partner.name}</td>
+                    <td className="px-6 py-4">
+                      <span className={`px-2.5 py-1 rounded text-[10px] font-bold uppercase ${
+                        partner.category === 'strategic' 
+                          ? 'bg-purple-100 text-purple-700 border border-purple-200' 
+                          : 'bg-emerald-100 text-emerald-700 border border-emerald-200'
+                      }`}>
+                        {partner.category}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      <button 
+                        onClick={() => handleDelete(partner.id)}
+                        className="text-slate-400 hover:text-red-600 transition-colors p-2 text-lg"
+                        title="Hapus Partner"
+                      >
+                        🗑️
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="4" className="py-20 text-center text-slate-400 italic">
+                    Belum ada partner yang ditambahkan.
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
-          {partners.length === 0 && (
-            <div className="py-20 text-center text-slate-400 italic">
-              Belum ada partner yang ditambahkan.
-            </div>
-          )}
         </div>
       </div>
 

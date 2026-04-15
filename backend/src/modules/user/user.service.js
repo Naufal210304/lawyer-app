@@ -97,6 +97,27 @@ const approvePendingUser = async (id) => {
   return await userModel.approvePendingUser(id);
 };
 
+// UPDATE USER
+const updateUser = async (id, userData) => {
+  return await userModel.updateUser(id, userData);
+};
+
+// UPDATE PASSWORD
+const updatePassword = async (id, oldPassword, newPassword) => {
+  const user = await userModel.getUserById(id);
+  if (!user) {
+    throw new Error('User not found');
+  }
+
+  const isOldPasswordValid = await verifyPassword(oldPassword, user.password);
+  if (!isOldPasswordValid) {
+    throw new Error('Current password is incorrect');
+  }
+
+  const hashedNewPassword = await hashPassword(newPassword);
+  return await userModel.updateUserPassword(id, hashedNewPassword);
+};
+
 // DELETE PENDING USER
 const deletePendingUser = async (id) => {
   return await userModel.deletePendingUser(id);
@@ -105,6 +126,8 @@ const deletePendingUser = async (id) => {
 module.exports = {
   authenticateUser,
   registerUser,
+  updateUser,
+  updatePassword,
   getAllUsers,
   getUserById,
   deleteUser,

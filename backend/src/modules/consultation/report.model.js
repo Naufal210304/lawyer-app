@@ -44,8 +44,19 @@ const getReportById = (id) => {
   });
 };
 
+const deleteReport = (id) => {
+  return new Promise((resolve, reject) => {
+    const query = 'DELETE FROM consultation_reports WHERE id = ?';
+    db.query(query, [id], (err, result) => {
+      if (err) return reject(err);
+      resolve(result.affectedRows);
+    });
+  });
+};
+
 module.exports = {
   insertReport,
   getAllReports,
   getReportById,
+  deleteReport,
 };

@@ -1,50 +1,151 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCamera, faUser } from '@fortawesome/free-solid-svg-icons';
+import axios from '../../services/axios';
 
 const Settings = () => {
-  // Mengambil data awal dari localStorage (fallback ke default jika kosong)
-  const [username, setUsername] = useState(localStorage.getItem('username') || 'Admin');
-  const [email, setEmail] = useState(localStorage.getItem('email') || 'admin@lawyer.com');
-  const [preview, setPreview] = useState(localStorage.getItem('profile_pic') || null);
-  
+  const [userData, setUserData] = useState({
+    username: '',
+    email: '',
+    phone_number: '',
+    profile_pic: null
+  });
+  const [preview, setPreview] = useState(null);
+  const [file, setFile] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
   const [passwordData, setPasswordData] = useState({
     current: '',
     new: '',
     confirm: ''
   });
+  const [passwordError, setPasswordError] = useState('');
+
+  useEffect(() => {
+    fetchUserProfile();
+  }, []);
+
+  const fetchUserProfile = async () => {
+    setLoading(true);
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        setError('No authentication token found');
+        return;
+      }
+
+      // Decode token to get user ID (simple decode, not secure but for demo)
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const userId = payload.id;
+
+      const response = await axios.get(`/users/${userId}`);
+      const user = response.data.data;
+      
+      setUserData({
+        username: user.username || '',
+        email: user.email || '',
+        phone_number: user.phone_number || '',
+        profile_pic: user.profile_pic || null
+      });
+      setPreview(user.profile_pic);
+      setError(null);
+    } catch (err) {
+      console.error(err);
+      setError('Failed to load user profile');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Menangani perubahan foto profil
   const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setPreview(reader.result);
-      };
-      reader.readAsDataURL(file);
+    const selectedFile = e.target.files[0];
+    if (selectedFile) {
+      setPreview(URL.createObjectURL(selectedFile));
+      setFile(selectedFile);
     }
   };
 
-  // Menyimpan perubahan profil ke localStorage agar tersinkronisasi dengan Dashboard
-  const handleSaveProfile = (e) => {
+  // Menyimpan perubahan profil ke database
+  const handleSaveProfile = async (e) => {
     e.preventDefault();
-    localStorage.setItem('username', username);
-    localStorage.setItem('email', email);
-    if (preview) localStorage.setItem('profile_pic', preview);
 
-    alert('Profil berhasil diperbarui!');
-    // Me-refresh halaman agar komponen Header yang membaca localStorage ikut terupdate
-    window.location.reload();
+    if (!userData.username.trim() || !userData.email.trim()) {
+      return alert('Nama pengguna dan email wajib diisi.');
+    }
+
+    try {
+      const token = localStorage.getItem('token');
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const userId = payload.id;
+
+      const formData = new FormData();
+      formData.append('username', userData.username.trim());
+      formData.append('email', userData.email.trim());
+      formData.append('phone_number', userData.phone_number.trim());
+      if (file) {
+        formData.append('profile_pic', file);
+      } else if (userData.profile_pic) {
+        formData.append('profile_pic', userData.profile_pic);
+      }
+
+      await axios.put(`/users/${userId}`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+
+      // Update localStorage
+      localStorage.setItem('username', userData.username);
+      localStorage.setItem('email', userData.email);
+      if (preview && preview !== userData.profile_pic) {
+        localStorage.setItem('profile_pic', preview);
+      }
+
+      alert('Profil berhasil diperbarui!');
+      // Refresh navbar
+      window.location.reload();
+    } catch (err) {
+      console.error(err);
+      alert(err.response?.data?.message || 'Failed to update profile');
+    }
   };
 
-  const handleUpdatePassword = (e) => {
+  const handleUpdatePassword = async (e) => {
     e.preventDefault();
+    setPasswordError('');
+
+    if (!passwordData.current || !passwordData.new || !passwordData.confirm) {
+      return alert('Semua field password wajib diisi.');
+    }
+
     if (passwordData.new !== passwordData.confirm) {
       return alert('Konfirmasi password baru tidak cocok!');
     }
-    alert('Password berhasil diubah!');
-    setPasswordData({ current: '', new: '', confirm: '' });
+
+    if (passwordData.new.length < 6) {
+      return alert('Password baru minimal 6 karakter!');
+    }
+
+    try {
+      const token = localStorage.getItem('token');
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const userId = payload.id;
+
+      await axios.put(`/users/${userId}/password`, {
+        old_password: passwordData.current,
+        new_password: passwordData.new
+      });
+
+      alert('Password berhasil diubah!');
+      setPasswordData({ current: '', new: '', confirm: '' });
+    } catch (err) {
+      console.error(err);
+      if (err.response?.data?.message === 'Current password is incorrect') {
+        setPasswordError('Password lama yang Anda masukkan salah.');
+      } else {
+        alert(err.response?.data?.message || 'Failed to update password');
+      }
+    }
   };
 
   return (
@@ -66,7 +167,7 @@ const Settings = () => {
                   <img src={preview} alt="Profile" className="w-full h-full object-cover" />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-4xl text-slate-300 font-bold uppercase">
-                    {username.charAt(0)}
+                    {userData.username.charAt(0)}
                   </div>
                 )}
               </div>
@@ -94,8 +195,8 @@ const Settings = () => {
                 <input 
                   type="text" required
                   className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
+                  value={userData.username}
+                  onChange={(e) => setUserData({...userData, username: e.target.value})}
                 />
               </div>
               <div>
@@ -103,8 +204,18 @@ const Settings = () => {
                 <input 
                   type="email" required
                   className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  value={userData.email}
+                  onChange={(e) => setUserData({...userData, email: e.target.value})}
+                />
+              </div>
+              <div className="md:col-span-2">
+                <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Nomor Telepon</label>
+                <input 
+                  type="tel"
+                  className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                  value={userData.phone_number}
+                  onChange={(e) => setUserData({...userData, phone_number: e.target.value})}
+                  placeholder="Contoh: 08123456789"
                 />
               </div>
             </div>
@@ -125,13 +236,21 @@ const Settings = () => {
             
             <div className="space-y-4">
               <div>
-                <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Password Saat Ini</label>
+                <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Password Lama</label>
                 <input 
                   type="password"
-                  className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                  className={`w-full px-4 py-2.5 border rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all ${
+                    passwordError ? 'border-red-300 focus:ring-red-500' : 'border-slate-200'
+                  }`}
                   value={passwordData.current}
-                  onChange={(e) => setPasswordData({...passwordData, current: e.target.value})}
+                  onChange={(e) => {
+                    setPasswordData({...passwordData, current: e.target.value});
+                    setPasswordError(''); // Clear error when user types
+                  }}
                 />
+                {passwordError && (
+                  <p className="mt-1 text-xs text-red-600 font-medium">{passwordError}</p>
+                )}
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
