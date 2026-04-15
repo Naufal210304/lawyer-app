@@ -3,7 +3,12 @@ import React from "react";
 const Navbar = ({ setIsMobileOpen }) => {
   const role = localStorage.getItem("role") || "user";
   const username = localStorage.getItem("username") || "Admin";
-  const profilePic = localStorage.getItem("profile_pic");
+  const rawProfilePic = localStorage.getItem("profile_pic");
+  const profilePic = rawProfilePic
+    ? rawProfilePic.startsWith('http')
+      ? rawProfilePic
+      : `http://localhost:3001${rawProfilePic}`
+    : null;
 
   return (
     <div className="h-16 bg-white shadow flex items-center justify-between px-4 md:px-6">

@@ -58,6 +58,17 @@ const getUserById = (id) => {
   });
 };
 
+const getUserByIdWithPassword = (id) => {
+  return new Promise((resolve, reject) => {
+    const query = 'SELECT id, username, email, password, phone_number, profile_pic, role_id FROM users WHERE id = ?';
+
+    db.query(query, [id], (err, results) => {
+      if (err) return reject(err);
+      resolve(results[0] || null);
+    });
+  });
+};
+
 // UPDATE USER
 const updateUser = (id, userData) => {
   return new Promise((resolve, reject) => {
@@ -83,6 +94,17 @@ const updateUserPassword = (id, hashedPassword) => {
     db.query(query, [hashedPassword, id], (err, result) => {
       if (err) return reject(err);
       resolve(result);
+    });
+  });
+};
+
+// DELETE USER
+const deleteUser = (id) => {
+  return new Promise((resolve, reject) => {
+    const query = 'DELETE FROM users WHERE id = ?';
+    db.query(query, [id], (err, result) => {
+      if (err) return reject(err);
+      resolve(result.affectedRows > 0);
     });
   });
 };
@@ -233,8 +255,10 @@ module.exports = {
   createUser,
   updateUser,
   updateUserPassword,
+  deleteUser,
   getAllUsers,
   getUserById,
+  getUserByIdWithPassword,
   getPendingUsers,
   getPendingUserById,
   createPendingUser,

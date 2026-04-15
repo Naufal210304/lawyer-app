@@ -48,18 +48,23 @@ exports.updateUser = async (req, res) => {
       return res.status(403).json({ message: 'You can only update your own profile' });
     }
 
+    const profile_pic = req.file ? `/uploads/${req.file.filename}` : null;
+
     const userData = {
       username,
       email,
       phone_number,
-      profile_pic: req.file ? `/uploads/${req.file.filename}` : req.body.profile_pic,
+      profile_pic,
     };
 
     await userService.updateUser(id, userData);
 
+    // Fetch updated user data to return complete profile
+    const updatedUser = await userService.getUserById(id);
+
     res.json({
       message: 'User profile updated successfully',
-      data: userData
+      data: updatedUser
     });
 
   } catch (error) {
@@ -98,23 +103,28 @@ exports.updatePassword = async (req, res) => {
   }
 };
 
-// 🗑️ DELETE user (superadmin only)
+// 🗑️ DELETE user (superadmin only or self-delete)
 exports.deleteUser = async (req, res) => {
   try {
     const { id } = req.params;
+    const userId = parseInt(id);
+    const currentUserId = parseInt(req.user.id);
 
-    // Check if user is superadmin
-    if (req.user.role !== 'superadmin') {
-      return res.status(403).json({ message: 'Only superadmin can delete users' });
+    console.log('Delete request - Current user:', currentUserId, 'Role:', req.user.role, 'Target user:', userId); // DEBUG
+
+    // Allow delete if: superadmin OR user deleting their own account
+    if (req.user.role !== 'superadmin' && currentUserId !== userId) {
+      return res.status(403).json({ message: 'Only superadmin can delete other users' });
     }
 
-    await userService.deleteUser(id);
+    await userService.deleteUser(userId);
 
     res.json({
       message: 'User deleted successfully'
     });
 
   } catch (error) {
+    console.error('Delete user error:', error); // DEBUG
     res.status(500).json({ message: 'Failed to delete user' });
   }
 };

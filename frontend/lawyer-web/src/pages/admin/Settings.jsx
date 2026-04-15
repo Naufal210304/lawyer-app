@@ -48,10 +48,17 @@ const Settings = () => {
         phone_number: user.phone_number || '',
         profile_pic: user.profile_pic || null
       });
-      setPreview(user.profile_pic);
+      
+      // Set preview - if profile_pic exists, construct full URL
+      if (user.profile_pic) {
+        const baseUrl = 'http://localhost:3001';
+        const fullUrl = user.profile_pic.startsWith('http') ? user.profile_pic : baseUrl + user.profile_pic;
+        setPreview(fullUrl);
+        localStorage.setItem('profile_pic', fullUrl);
+      }
       setError(null);
     } catch (err) {
-      console.error(err);
+      console.error('Error fetching profile:', err);
       setError('Failed to load user profile');
     } finally {
       setLoading(false);
@@ -76,6 +83,7 @@ const Settings = () => {
     }
 
     try {
+      setLoading(true);
       const token = localStorage.getItem('token');
       const payload = JSON.parse(atob(token.split('.')[1]));
       const userId = payload.id;
@@ -84,29 +92,40 @@ const Settings = () => {
       formData.append('username', userData.username.trim());
       formData.append('email', userData.email.trim());
       formData.append('phone_number', userData.phone_number.trim());
+      
       if (file) {
+        console.log('Uploading new profile picture:', file.name); // DEBUG
         formData.append('profile_pic', file);
-      } else if (userData.profile_pic) {
-        formData.append('profile_pic', userData.profile_pic);
       }
 
-      await axios.put(`/users/${userId}`, formData, {
+      console.log('Sending profile update to server...'); // DEBUG
+      const response = await axios.put(`/users/${userId}`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
+      console.log('Profile update response:', response.data); // DEBUG
 
-      // Update localStorage
+      // Update localStorage with new data
       localStorage.setItem('username', userData.username);
       localStorage.setItem('email', userData.email);
-      if (preview && preview !== userData.profile_pic) {
-        localStorage.setItem('profile_pic', preview);
+      
+      // Store profile picture URL from response as full URL
+      if (response.data.data?.profile_pic) {
+        const baseUrl = 'http://localhost:3001';
+        const fullProfilePic = response.data.data.profile_pic.startsWith('http')
+          ? response.data.data.profile_pic
+          : `${baseUrl}${response.data.data.profile_pic}`;
+        localStorage.setItem('profile_pic', fullProfilePic);
       }
 
       alert('Profil berhasil diperbarui!');
+      setFile(null); // Clear file after upload
       // Refresh navbar
       window.location.reload();
     } catch (err) {
-      console.error(err);
-      alert(err.response?.data?.message || 'Failed to update profile');
+      console.error('Error updating profile:', err.response?.data || err.message);
+      alert('Error: ' + (err.response?.data?.message || err.message || 'Failed to update profile'));
+    } finally {
+      setLoading(false);
     }
   };
 

@@ -104,7 +104,7 @@ const updateUser = async (id, userData) => {
 
 // UPDATE PASSWORD
 const updatePassword = async (id, oldPassword, newPassword) => {
-  const user = await userModel.getUserById(id);
+  const user = await userModel.getUserByIdWithPassword(id);
   if (!user) {
     throw new Error('User not found');
   }

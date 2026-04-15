@@ -82,6 +82,19 @@ const Report = () => {
       });
   }, [reports, statusFilter, serviceAreaFilter, selectedDate, sortOption]);
 
+  const handleDeleteReport = async (id) => {
+    if (!window.confirm('Yakin hapus laporan ini?')) return;
+
+    try {
+      await axios.delete(`/reports/${id}`);
+      setReports((prev) => prev.filter((item) => item.id !== id));
+      alert('Laporan berhasil dihapus');
+    } catch (error) {
+      console.error('Error deleting report:', error.response?.data || error.message);
+      alert('Gagal hapus laporan: ' + (error.response?.data?.message || error.message));
+    }
+  };
+
   const closeModal = () => setSelectedConsultation(null);
 
   return (

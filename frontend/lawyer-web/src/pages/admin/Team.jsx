@@ -19,23 +19,44 @@ const Team = () => {
     order_index: 0
   });
 
+  console.log('Team component - Current role:', role); // DEBUG
+  console.log('Team component - Active team count:', activeTeam.length); // DEBUG
+
   useEffect(() => {
     fetchData();
   }, []);
 
   const fetchData = async () => {
     try {
-      // Fetch pending users
-      const pendingRes = await axios.get('/auth/pending');
-      setPendingAdmins(pendingRes.data.data || []);
+      // Fetch pending users - only for superadmin
+      if (role === 'superadmin') {
+        try {
+          const pendingRes = await axios.get('/auth/pending');
+          setPendingAdmins(pendingRes.data.data || []);
+        } catch (pendingError) {
+          console.error('Error fetching pending users:', pendingError);
+          // Don't fail completely if pending users can't be fetched
+        }
+      }
 
-      // Fetch active users from users table
-      const activeRes = await axios.get('/users');
-      setActiveTeam(activeRes.data.data || []);
+      // Fetch active users from users table - for both admin and superadmin
+      try {
+        const activeRes = await axios.get('/users');
+        setActiveTeam(activeRes.data.data || []);
+        console.log('Active team data:', activeRes.data.data); // DEBUG
+      } catch (activeError) {
+        console.error('Error fetching active users:', activeError);
+        alert('Gagal memuat data active team: ' + (activeError.response?.data?.message || activeError.message));
+      }
 
       // Fetch team members
-      const teamRes = await axios.get('/team');
-      setTeamMembers(teamRes.data.data || []);
+      try {
+        const teamRes = await axios.get('/team');
+        setTeamMembers(teamRes.data.data || []);
+      } catch (teamError) {
+        console.error('Error fetching team members:', teamError);
+        // Don't fail completely if team members can't be fetched
+      }
     } catch (error) {
       console.error('Error fetching team data:', error);
     } finally {
@@ -74,11 +95,19 @@ const Team = () => {
   const handleDelete = async (id) => {
     if (window.confirm('Yakin hapus user ini?')) {
       try {
-        await axios.delete(`/users/${id}`);
+        console.log('Deleting user:', id); // DEBUG
+        const response = await axios.delete(`/users/${id}`);
+        console.log('Delete response:', response.data); // DEBUG
         setActiveTeam(prev => prev.filter(u => u.id !== id));
+        alert('User berhasil dihapus!');
       } catch (error) {
-        console.error('Error deleting user:', error);
-        alert('Gagal hapus user');
+        console.error('Error deleting user:', error.response?.data || error.message);
+        const errorMsg = error.response?.data?.message || error.message;
+        if (errorMsg.includes('superadmin')) {
+          alert('Hanya superadmin yang bisa menghapus user');
+        } else {
+          alert('Gagal hapus user: ' + errorMsg);
+        }
       }
     }
   };
@@ -189,7 +218,10 @@ const Team = () => {
       <div className="mb-6">
         <h1 className="text-xl md:text-3xl font-bold text-gray-800">Team & User Management</h1>
         <p className="text-sm md:text-base text-gray-600">
-          Kelola hak akses admin dan verifikasi pendaftaran akun baru.
+          {role === 'superadmin' 
+            ? 'Kelola hak akses admin dan verifikasi pendaftaran akun baru.'
+            : 'Lihat daftar anggota tim aktif dan kelola anggota tim.'
+          }
         </p>
       </div>
 
@@ -282,36 +314,44 @@ const Team = () => {
               </tr>
             </thead>
             <tbody>
-              {activeTeam.map((member) => (
-                <tr key={member.id} className="border-t hover:bg-slate-50">
-                  <td className="px-4 py-3">
-                    <div className="font-bold">{member.username}</div>
-                    <div className="text-xs text-gray-500">{member.email}</div>
-                  </td>
-                  <td className="px-4 py-3">
-                    {member.role_id === 1 ? 'Superadmin' : 'Admin'}
-                  </td>
-                  <td className="px-4 py-3 text-center">
-                    <span className={`text-xs font-bold ${member.role_id === 1 ? 'text-purple-600' : 'text-blue-600'}`}>
+              {activeTeam.length > 0 ? (
+                activeTeam.map((member) => (
+                  <tr key={member.id} className="border-t hover:bg-slate-50">
+                    <td className="px-4 py-3">
+                      <div className="font-bold">{member.username}</div>
+                      <div className="text-xs text-gray-500">{member.email}</div>
+                    </td>
+                    <td className="px-4 py-3">
                       {member.role_id === 1 ? 'Superadmin' : 'Admin'}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 text-center text-green-600 font-semibold">
-                    Active
-                  </td>
-                  <td className="px-4 py-3 text-right">
-                    {role === 'superadmin' && (
-                      <button
-                        onClick={() => handleDelete(member.id)}
-                        className="p-2 text-red-600 hover:bg-red-100 rounded-md transition-colors"
-                        title="Hapus User"
-                      >
-                        <FontAwesomeIcon icon={faTrash} />
-                      </button>
-                    )}
+                    </td>
+                    <td className="px-4 py-3 text-center">
+                      <span className={`text-xs font-bold ${member.role_id === 1 ? 'text-purple-600' : 'text-blue-600'}`}>
+                        {member.role_id === 1 ? 'Superadmin' : 'Admin'}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 text-center text-green-600 font-semibold">
+                      Active
+                    </td>
+                    <td className="px-4 py-3 text-right">
+                      {role === 'superadmin' && (
+                        <button
+                          onClick={() => handleDelete(member.id)}
+                          className="p-2 text-red-600 hover:bg-red-100 rounded-md transition-colors"
+                          title="Hapus User"
+                        >
+                          <FontAwesomeIcon icon={faTrash} />
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="5" className="text-center py-6 text-gray-400">
+                    {loading ? 'Memuat data...' : 'Tidak ada data active team'}
                   </td>
                 </tr>
-              ))}
+              )}
             </tbody>
           </table>
 

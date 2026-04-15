@@ -50,13 +50,20 @@ const PracticeArea = () => {
     }
 
     try {
+      setLoading(true);
+      console.log('Sending practice area data:', formData); // DEBUG
       const response = await axios.post('/practice-areas', formData);
+      console.log('Response:', response.data); // DEBUG
       setPracticeAreas([...practiceAreas, response.data.data]);
+      alert('Bidang layanan berhasil ditambahkan!');
       setIsModalOpen(false);
       setFormData({ title: '', slug: '', description: '', detail: '', cases_example: '' });
+      fetchPracticeAreas(); // Refresh data
     } catch (err) {
-      console.error(err);
-      alert(err.response?.data?.message || 'Failed to create practice area');
+      console.error('Error creating practice area:', err.response?.data || err.message);
+      alert('Error: ' + (err.response?.data?.message || err.message || 'Failed to create practice area'));
+    } finally {
+      setLoading(false);
     }
   };
 
