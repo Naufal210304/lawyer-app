@@ -88,10 +88,23 @@ const deleteTeamMember = (id) => {
   });
 };
 
+// GET TEAM MEMBERS COUNT
+const getTeamMembersCount = () => {
+  return new Promise((resolve, reject) => {
+    const query = 'SELECT COUNT(*) as count FROM team_members';
+
+    db.query(query, (err, results) => {
+      if (err) return reject(err);
+      resolve(results[0]?.count || 0);
+    });
+  });
+};
+
 module.exports = {
   getAllTeamMembers,
   getTeamMemberById,
   createTeamMember,
   updateTeamMember,
-  deleteTeamMember
+  deleteTeamMember,
+  getTeamMembersCount
 };

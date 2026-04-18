@@ -1,13 +1,14 @@
 import React from "react";
+import useAuth from "../../../hooks/useAuth";
 
 const Navbar = ({ setIsMobileOpen }) => {
-  const role = localStorage.getItem("role") || "user";
-  const username = localStorage.getItem("username") || "Admin";
-  const rawProfilePic = localStorage.getItem("profile_pic");
-  const profilePic = rawProfilePic
-    ? rawProfilePic.startsWith('http')
-      ? rawProfilePic
-      : `http://localhost:3001${rawProfilePic}`
+  const { role, username, profilePic } = useAuth();
+  
+  const displayUsername = username || "Admin";
+  const profilePicUrl = profilePic
+    ? profilePic.startsWith('http')
+      ? profilePic
+      : `http://localhost:3001${profilePic}`
     : null;
 
   return (
@@ -30,15 +31,15 @@ const Navbar = ({ setIsMobileOpen }) => {
       {/* Right */}
       <div className="flex items-center gap-3 md:gap-4">
         <span className="text-xs md:text-sm text-gray-600">
-          {username} ({role})
+          {displayUsername} ({role})
         </span>
 
         <div className="w-7 h-7 md:w-8 md:h-8 bg-gray-300 rounded-full overflow-hidden flex items-center justify-center">
-          {profilePic ? (
-            <img src={profilePic} alt="Profile" className="w-full h-full object-cover" />
+          {profilePicUrl ? (
+            <img src={profilePicUrl} alt="Profile" className="w-full h-full object-cover" />
           ) : (
             <span className="text-white font-bold text-sm uppercase">
-              {username.charAt(0)}
+              {displayUsername.charAt(0)}
             </span>
           )}
         </div>

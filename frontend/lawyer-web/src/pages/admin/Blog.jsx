@@ -93,7 +93,6 @@ const Blog = () => {
                 <th className="px-6 py-4 border-b">ID</th>
                 <th className="px-6 py-4 border-b">Title & Slug</th>
                 <th className="px-6 py-4 border-b">Details</th>
-                <th className="px-6 py-4 border-b">Type</th>
                 <th className="px-6 py-4 border-b">Status</th>
                 <th className="px-6 py-4 border-b">Created At</th>
                 <th className="px-6 py-4 border-b text-center">Aksi</th>
@@ -102,7 +101,7 @@ const Blog = () => {
             {loading ? (
               <tbody>
                 <tr>
-                  <td colSpan="7" className="px-6 py-8 text-center text-slate-500">
+                  <td colSpan="6" className="px-6 py-8 text-center text-slate-500">
                     Loading blogs...
                   </td>
                 </tr>
@@ -127,11 +126,6 @@ const Blog = () => {
                       <span className="text-slate-500 font-medium uppercase">Auth ID: {blog.author_id}</span>
                       <span className="text-slate-400">Cat ID: {blog.category_id}</span>
                     </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className="px-2 py-1 bg-slate-100 text-slate-600 rounded text-[10px] font-bold uppercase tracking-tight">
-                      {blog.type}
-                    </span>
                   </td>
                   <td className="px-6 py-4">
                     <span className={`px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${

@@ -50,9 +50,20 @@ const deleteConsultation = (id) => {
   });
 };
 
+const getPendingConsultationsCount = () => {
+  return new Promise((resolve, reject) => {
+    const query = 'SELECT COUNT(*) as count FROM consultations';
+    db.query(query, (err, results) => {
+      if (err) return reject(err);
+      resolve(results[0]?.count || 0);
+    });
+  });
+};
+
 module.exports = {
   getAllPendingConsultations,
   getConsultationById,
   createConsultation,
   deleteConsultation,
+  getPendingConsultationsCount,
 };

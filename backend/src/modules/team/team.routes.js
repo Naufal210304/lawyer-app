@@ -40,6 +40,9 @@ router.use(authMiddleware);
 // GET /api/team - Get all team members
 router.get('/', teamController.getAllTeamMembers);
 
+// GET /api/team/stats/count - Get team members count
+router.get('/stats/count', teamController.getTeamMembersCount);
+
 // GET /api/team/:id - Get team member by ID
 router.get('/:id', teamController.getTeamMemberById);
 

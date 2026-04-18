@@ -28,7 +28,8 @@ const login = async (req, res) => {
       user: {
         id: user.id,
         username: user.username,
-        email: user.email
+        email: user.email,
+        profile_pic: user.profile_pic
       }
     });
 
@@ -70,6 +71,7 @@ const me = async (req, res) => {
         id: user.id,
         username: user.username,
         email: user.email,
+        profile_pic: user.profile_pic,
         role: user.role_id === 1 ? 'superadmin' : 'admin'
       }
     });
@@ -137,4 +139,23 @@ const rejectPendingUser = async (req, res) => {
   }
 };
 
-module.exports = { login, register, me, getPendingUsers, approvePendingUser, rejectPendingUser };
+const getPendingUsersCount = async (req, res) => {
+  try {
+    // Check if user is superadmin
+    if (req.user.role !== 'superadmin') {
+      return res.status(403).json({ message: 'Only superadmin can view pending users count' });
+    }
+
+    const count = await userService.getPendingUsersCount();
+    res.json({
+      success: true,
+      message: 'Pending users count fetched successfully',
+      data: { count }
+    });
+  } catch (error) {
+    console.error('GetPendingUsersCount error:', error);
+    res.status(500).json({ message: 'Failed to get pending users count' });
+  }
+};
+
+module.exports = { login, register, me, getPendingUsers, approvePendingUser, rejectPendingUser, getPendingUsersCount };

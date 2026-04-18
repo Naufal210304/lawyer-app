@@ -23,6 +23,16 @@ const getTeamMemberById = async (req, res) => {
   }
 };
 
+// GET TEAM MEMBERS COUNT
+const getTeamMembersCount = async (req, res) => {
+  try {
+    const count = await teamService.getTeamMembersCount();
+    response.success(res, 'Team members count retrieved successfully', { count });
+  } catch (error) {
+    response.error(res, error.message, 500);
+  }
+};
+
 // CREATE TEAM MEMBER
 const createTeamMember = async (req, res) => {
   try {
@@ -73,6 +83,7 @@ const deleteTeamMember = async (req, res) => {
 module.exports = {
   getAllTeamMembers,
   getTeamMemberById,
+  getTeamMembersCount,
   createTeamMember,
   updateTeamMember,
   deleteTeamMember

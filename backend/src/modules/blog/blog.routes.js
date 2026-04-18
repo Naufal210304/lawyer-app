@@ -9,6 +9,9 @@ const upload = multer({ dest: 'uploads/' });
 
 // Public
 router.get('/', blogController.getBlogs);
+router.get('/stats/count', blogController.getBlogCount);
+router.get('/categories', blogController.getBlogCategories);
+router.get('/suggest', blogController.getSuggestedBlogs);
 router.get('/:id', blogController.getBlogById);
 
 // Protected + Upload

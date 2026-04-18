@@ -11,7 +11,6 @@ const CreateBlog = () => {
     title: '',
     slug: '',
     category_id: '',
-    type: 'latest',
     status: 'published',
     content: '',
   });
@@ -47,7 +46,6 @@ const CreateBlog = () => {
       data.append('title', formData.title);
       data.append('slug', formData.slug);
       data.append('category_id', formData.category_id);
-      data.append('type', formData.type);
       data.append('status', formData.status);
       data.append('content', formData.content);
 
@@ -144,20 +142,6 @@ const CreateBlog = () => {
                 <option value="3">Criminal Defense</option>
                 <option value="4">Family Law</option>
               </select>
-            </div>
-
-            <div>
-              <label className="block text-xs font-bold text-slate-500 uppercase mb-2">Tipe Tampilan</label>
-              <div className="flex gap-4">
-                <label className="flex items-center gap-2 text-sm text-slate-600 cursor-pointer">
-                  <input type="radio" name="type" value="latest" checked={formData.type === 'latest'} onChange={(e) => setFormData({...formData, type: e.target.value})} className="accent-blue-600" />
-                  Latest
-                </label>
-                <label className="flex items-center gap-2 text-sm text-slate-600 cursor-pointer">
-                  <input type="radio" name="type" value="suggest" checked={formData.type === 'suggest'} onChange={(e) => setFormData({...formData, type: e.target.value})} className="accent-blue-600" />
-                  Suggest
-                </label>
-              </div>
             </div>
 
             <div>

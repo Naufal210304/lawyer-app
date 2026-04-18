@@ -9,6 +9,7 @@ router.post('/', consultationController.createConsultation);
 // Protected admin routes
 router.use(authMiddleware);
 router.get('/', consultationController.getPendingConsultations);
+router.get('/stats/count', consultationController.getPendingConsultationsCount);
 router.get('/:id', consultationController.getConsultationById);
 router.put('/:id/approve', consultationController.approveConsultation);
 router.put('/:id/reject', consultationController.rejectConsultation);

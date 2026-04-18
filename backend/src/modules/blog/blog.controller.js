@@ -72,6 +72,37 @@ exports.updateBlogStatus = async (req, res, next) => {
   }
 };
 
+// GET BLOG COUNT
+exports.getBlogCount = async (req, res, next) => {
+  try {
+    const count = await blogService.getBlogCount();
+    return response.success(res, "Blog count fetched successfully", { count });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// GET BLOG CATEGORIES
+exports.getBlogCategories = async (req, res, next) => {
+  try {
+    const categories = await blogService.getBlogCategories();
+    return response.success(res, "Blog categories fetched successfully", categories);
+  } catch (error) {
+    next(error);
+  }
+};
+
+// GET SUGGESTED BLOGS
+exports.getSuggestedBlogs = async (req, res, next) => {
+  try {
+    const { keyword } = req.query;
+    const blogs = await blogService.getSuggestedBlogs(keyword);
+    return response.success(res, "Suggested blogs fetched successfully", blogs);
+  } catch (error) {
+    next(error);
+  }
+};
+
 // DELETE BLOG
 exports.deleteBlog = async (req, res, next) => {
   try {

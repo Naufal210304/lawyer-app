@@ -77,6 +77,10 @@ const deleteReport = async (id) => {
   return true;
 };
 
+const getPendingConsultationsCount = async () => {
+  return consultationModel.getPendingConsultationsCount();
+};
+
 module.exports = {
   createConsultation,
   getPendingConsultations,
@@ -86,4 +90,5 @@ module.exports = {
   getReports,
   getReportById,
   deleteReport,
+  getPendingConsultationsCount,
 };

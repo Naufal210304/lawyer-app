@@ -61,10 +61,20 @@ const rejectConsultation = async (req, res, next) => {
   }
 };
 
+const getPendingConsultationsCount = async (req, res, next) => {
+  try {
+    const count = await consultationService.getPendingConsultationsCount();
+    res.json({ success: true, message: 'Pending consultations count fetched successfully', data: { count } });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   createConsultation,
   getPendingConsultations,
   getConsultationById,
   approveConsultation,
   rejectConsultation,
+  getPendingConsultationsCount,
 };

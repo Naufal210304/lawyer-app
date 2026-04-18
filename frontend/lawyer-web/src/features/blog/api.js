@@ -9,3 +9,24 @@ export const fetchBlogs = async () => {
     throw error;
   }
 };
+
+export const fetchSuggestedBlogs = async (keyword = null) => {
+  try {
+    const params = keyword ? { keyword } : {};
+    const response = await axios.get('/blogs/suggest', { params });
+    return response.data.data;
+  } catch (error) {
+    console.error('Error fetching suggested blogs:', error);
+    throw error;
+  }
+};
+
+export const fetchBlogCategories = async () => {
+  try {
+    const response = await axios.get('/blogs/categories');
+    return response.data.data;
+  } catch (error) {
+    console.error('Error fetching blog categories:', error);
+    throw error;
+  }
+};

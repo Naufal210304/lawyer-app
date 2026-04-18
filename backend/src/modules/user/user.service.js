@@ -123,6 +123,11 @@ const deletePendingUser = async (id) => {
   return await userModel.deletePendingUser(id);
 };
 
+// GET PENDING USERS COUNT
+const getPendingUsersCount = async () => {
+  return await userModel.getPendingUsersCount();
+};
+
 module.exports = {
   authenticateUser,
   registerUser,
@@ -133,5 +138,6 @@ module.exports = {
   deleteUser,
   getPendingUsers,
   approvePendingUser,
-  deletePendingUser
+  deletePendingUser,
+  getPendingUsersCount
 };

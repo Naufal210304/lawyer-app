@@ -248,6 +248,18 @@ const deletePendingUser = (id) => {
   });
 };
 
+// GET PENDING USERS COUNT
+const getPendingUsersCount = () => {
+  return new Promise((resolve, reject) => {
+    const query = 'SELECT COUNT(*) as count FROM pending_users WHERE status = "pending"';
+
+    db.query(query, (err, results) => {
+      if (err) return reject(err);
+      resolve(results[0]?.count || 0);
+    });
+  });
+};
+
 module.exports = {
   findUserByUsernameOrEmail,
   findUserByEmail,
@@ -263,5 +275,6 @@ module.exports = {
   getPendingUserById,
   createPendingUser,
   approvePendingUser,
-  deletePendingUser
+  deletePendingUser,
+  getPendingUsersCount
 };

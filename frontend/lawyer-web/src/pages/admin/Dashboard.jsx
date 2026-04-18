@@ -1,10 +1,68 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
+import axios from '../../services/axios';
 
 const Dashboard = () => {
 
   const role = localStorage.getItem('role');
   const username = localStorage.getItem('username') || 'Admin';
+
+  // State untuk stats
+  const [stats, setStats] = useState({
+    totalBlogs: 0,
+    pendingConsultations: 0,
+    totalTeam: 0,
+    pendingUsers: 0,
+    loading: true,
+    error: null
+  });
+
+  // Fetch stats saat component mount
+  useEffect(() => {
+    const fetchStats = async () => {
+      const endpoints = [
+        { key: 'totalBlogs', url: '/blogs/stats/count' },
+        { key: 'pendingConsultations', url: '/consultations/stats/count' },
+        { key: 'totalTeam', url: '/team/stats/count' },
+        { key: 'pendingUsers', url: '/auth/pending/count' }
+      ];
+
+      try {
+        const results = await Promise.allSettled(
+          endpoints.map((endpoint) => axios.get(endpoint.url))
+        );
+
+        const newStats = {
+          totalBlogs: 0,
+          pendingConsultations: 0,
+          totalTeam: 0,
+          pendingUsers: 0,
+          loading: false,
+          error: null
+        };
+
+        results.forEach((result, index) => {
+          if (result.status === 'fulfilled') {
+            const count = result.value.data?.data?.count;
+            newStats[endpoints[index].key] = typeof count === 'number' ? count : 0;
+          } else {
+            console.warn(`Failed loading ${endpoints[index].key}:`, result.reason);
+          }
+        });
+
+        setStats(newStats);
+      } catch (error) {
+        console.error('Error fetching stats:', error);
+        setStats((prev) => ({
+          ...prev,
+          loading: false,
+          error: 'Gagal memuat data'
+        }));
+      }
+    };
+
+    fetchStats();
+  }, []);
 
   const chartData = [
     { name: 'Jan', total: 12 },
@@ -29,6 +87,13 @@ const Dashboard = () => {
     { id: 5, name: "Dedi Kurniawan", status: "Approved", time: "Yesterday" },
   ];
 
+  const statCards = [
+    { title: "Total Blog", value: stats.totalBlogs },
+    { title: "Konsultasi Pending", value: stats.pendingConsultations },
+    { title: "Total Team", value: stats.totalTeam },
+    { title: "Akun Pending", value: stats.pendingUsers }
+  ];
+
   return (
     <div>
 
@@ -46,10 +111,10 @@ const Dashboard = () => {
       {/* Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-6 md:mb-8">
 
-        {["Total Blog", "Konsultasi Pending", "Total Team", "Akun Pending"].map((title, i) => (
+        {statCards.map((card, i) => (
           <div key={i} className="bg-white p-4 md:p-6 rounded-xl shadow-sm border border-slate-200 hover:border-blue-300 transition-colors">
-            <h3 className="text-gray-500 text-sm">{title}</h3>
-            <p className="text-xl md:text-2xl font-bold text-slate-900">{[2, 2, 3, 2][i]}</p>
+            <h3 className="text-gray-500 text-sm">{card.title}</h3>
+            <p className="text-xl md:text-2xl font-bold text-slate-900">{card.value}</p>
           </div>
         ))}
 

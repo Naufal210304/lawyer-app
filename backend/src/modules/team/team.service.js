@@ -74,10 +74,20 @@ const deleteTeamMember = async (id) => {
   }
 };
 
+// GET TEAM MEMBERS COUNT
+const getTeamMembersCount = async () => {
+  try {
+    return await teamModel.getTeamMembersCount();
+  } catch (error) {
+    throw new Error('Failed to fetch team members count: ' + error.message);
+  }
+};
+
 module.exports = {
   getAllTeamMembers,
   getTeamMemberById,
   createTeamMember,
   updateTeamMember,
-  deleteTeamMember
+  deleteTeamMember,
+  getTeamMembersCount
 };
