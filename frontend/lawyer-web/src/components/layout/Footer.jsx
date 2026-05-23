@@ -77,17 +77,42 @@ const Footer = () => {
 
           <div>
             <h4 className="text-white font-bold mb-6 uppercase tracking-widest text-sm">Kantor Kami</h4>
-            <div className="flex items-start gap-3 text-gray-400 text-sm">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-[#C5A02E] mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-              </svg>
-              <p className="leading-relaxed">
-                Sudirman Central Business District (SCBD), <br />
-                Mandiri Tower Lt. 25, <br />
-                Jl. Jend. Sudirman Kav. 52-53, <br />
-                Jakarta Selatan, 12190
-              </p>
+            <div className="space-y-6 text-gray-400 text-sm">
+              <div className="flex items-start gap-3">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-[#C5A02E] mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                <p className="leading-relaxed">
+                  Jl. WR. Supratman, Lt. 3, dKupi Aceh, Gampong Keudah, Kec. Kuta Raja,<br />
+                  Kota Banda Aceh, Aceh, Indonesia.
+                </p>
+              </div>
+              <div className="flex items-start gap-3">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-[#C5A02E] mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5h2l.4 2M7 13h10l4-8H5.4" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 13l-1.5 7h13L17 13" />
+                </svg>
+                <div className="leading-relaxed">
+                  <p>081360724257</p>
+                  <p>082273695774</p>
+                  <p>082237973427</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-[#C5A02E] mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 12a4 4 0 01-8 0 4 4 0 018 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 14v7" />
+                </svg>
+                <p className="leading-relaxed">splawoffice16@gmail.com</p>
+              </div>
+              <div className="flex items-start gap-3">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-[#C5A02E] mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <p className="leading-relaxed">Jam Buka: 08.00 – 17.00</p>
+              </div>
             </div>
           </div>
         </div>

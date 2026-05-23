@@ -46,17 +46,12 @@ user: {
 - Superadmin user: `AbuSaminan12` (admin@email.com) - Password reset to `admin123`
 - Admin user: `Desinta Maharani` (desintads@gmail.com) - Password reset to `admin123`
 
-Scripts dibuat:
-- [reset_password.js](backend/reset_password.js) - Reset superadmin password
-- [reset_password_admin.js](backend/reset_password_admin.js) - Reset admin password
+Script dibuat:
+- [reset_passwords.js](backend/reset_passwords.js) - Reset password superadmin dan admin
 
 **Cara menjalankan:**
 ```bash
-# Reset superadmin password
-node backend/reset_password.js
-
-# Reset admin password  
-node backend/reset_password_admin.js
+node backend/reset_passwords.js
 ```
 
 ---
@@ -165,8 +160,7 @@ const { role, username, profilePic } = useAuth();
 
 **Backend:**
 - `src/modules/auth/auth.controller.js` - Login & /me endpoints
-- `reset_password.js` (NEW) - Password reset script untuk superadmin
-- `reset_password_admin.js` (NEW) - Password reset script untuk admin
+- `reset_passwords.js` (NEW) - Password reset script untuk superadmin dan admin
 
 **Frontend:**
 - `src/context/AuthContext.jsx` - Add username & profilePic state management

@@ -4,6 +4,8 @@ import axios from '../../services/axios';
 const PracticeArea = () => {
   const [practiceAreas, setPracticeAreas] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editingId, setEditingId] = useState(null);
   const [formData, setFormData] = useState({
     title: '',
     slug: '',
@@ -52,16 +54,23 @@ const PracticeArea = () => {
     try {
       setLoading(true);
       console.log('Sending practice area data:', formData); // DEBUG
-      const response = await axios.post('/practice-areas', formData);
-      console.log('Response:', response.data); // DEBUG
-      setPracticeAreas([...practiceAreas, response.data.data]);
-      alert('Bidang layanan berhasil ditambahkan!');
+      if (isEditing && editingId) {
+        const response = await axios.put(`/practice-areas/${editingId}`, formData);
+        setPracticeAreas(practiceAreas.map(a => (a.id === editingId ? response.data.data : a)));
+        alert('Bidang layanan berhasil diperbarui!');
+      } else {
+        const response = await axios.post('/practice-areas', formData);
+        setPracticeAreas([...practiceAreas, response.data.data]);
+        alert('Bidang layanan berhasil ditambahkan!');
+      }
       setIsModalOpen(false);
+      setIsEditing(false);
+      setEditingId(null);
       setFormData({ title: '', slug: '', description: '', detail: '', cases_example: '' });
       fetchPracticeAreas(); // Refresh data
     } catch (err) {
-      console.error('Error creating practice area:', err.response?.data || err.message);
-      alert('Error: ' + (err.response?.data?.message || err.message || 'Failed to create practice area'));
+      console.error('Error saving practice area:', err.response?.data || err.message);
+      alert('Error: ' + (err.response?.data?.message || err.message || 'Failed to save practice area'));
     } finally {
       setLoading(false);
     }
@@ -122,8 +131,21 @@ const PracticeArea = () => {
                     <td className="px-6 py-4 text-slate-500 max-w-xs truncate">{area.description}</td>
                     <td className="px-6 py-4 text-right">
                       <button 
+                        onClick={() => { 
+                          setIsEditing(true); 
+                          setEditingId(area.id); 
+                          setFormData({ title: area.title || '', slug: area.slug || '', description: area.description || '', detail: area.detail || '', cases_example: area.cases_example || '' });
+                          setIsModalOpen(true);
+                        }}
+                        className="text-slate-400 hover:text-amber-600 transition-colors p-2 mr-2"
+                        title="Edit"
+                      >
+                        ✏️
+                      </button>
+                      <button 
                         onClick={() => handleDelete(area.id)}
                         className="text-slate-400 hover:text-red-600 transition-colors p-2"
+                        title="Hapus"
                       >
                         🗑️
                       </button>
@@ -147,8 +169,8 @@ const PracticeArea = () => {
         <div className="fixed inset-0 z-[999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
           <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full overflow-hidden animate-in fade-in zoom-in duration-200">
             <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
-              <h3 className="font-bold text-lg text-slate-800">Add New Practice Area</h3>
-              <button onClick={() => setIsModalOpen(false)} className="text-slate-400 hover:text-slate-600 transition-colors text-2xl font-light">&times;</button>
+              <h3 className="font-bold text-lg text-slate-800">{isEditing ? 'Edit Practice Area' : 'Add New Practice Area'}</h3>
+              <button onClick={() => { setIsModalOpen(false); setIsEditing(false); setEditingId(null); }} className="text-slate-400 hover:text-slate-600 transition-colors text-2xl font-light">&times;</button>
             </div>
             <form onSubmit={handleSubmit} className="p-8 space-y-4 max-h-[75vh] overflow-y-auto">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -198,8 +220,8 @@ const PracticeArea = () => {
                 ></textarea>
               </div>
               <div className="flex gap-3 pt-4">
-                <button type="button" onClick={() => setIsModalOpen(false)} className="flex-1 px-4 py-3 bg-slate-100 text-slate-600 rounded-xl font-bold hover:bg-slate-200 transition-all text-sm">Batal</button>
-                <button type="submit" className="flex-1 px-4 py-3 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition-all text-sm">Simpan Layanan</button>
+                <button type="button" onClick={() => { setIsModalOpen(false); setIsEditing(false); setEditingId(null); }} className="flex-1 px-4 py-3 bg-slate-100 text-slate-600 rounded-xl font-bold hover:bg-slate-200 transition-all text-sm">Batal</button>
+                <button type="submit" className="flex-1 px-4 py-3 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition-all text-sm">{isEditing ? 'Perbarui Layanan' : 'Simpan Layanan'}</button>
               </div>
             </form>
           </div>

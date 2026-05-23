@@ -1,33 +1,37 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
+import axios from '../services/axios';
+
+const apiBase = import.meta.env.VITE_API_BASE_URL ? import.meta.env.VITE_API_BASE_URL.replace(/\/api\/?$/, '') : 'http://localhost:3001';
+
+const getLogoUrl = (logoUrl) => {
+  if (!logoUrl) return 'https://via.placeholder.com/200x100?text=No+Logo';
+  if (logoUrl.startsWith('http')) return logoUrl;
+  if (logoUrl.startsWith('/')) return `${apiBase}${logoUrl}`;
+  return `${apiBase}/${logoUrl}`;
+};
 
 const Partners = () => {
+  const [partners, setPartners] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
   useEffect(() => {
     window.scrollTo(0, 0);
-  }, []);
 
-  const partnerCategories = [
-    {
-      title: "Strategic Alliances",
-      description: "Kami bekerja sama dengan pakar industri dan firma global untuk memberikan solusi hukum yang komprehensif.",
-      logos: [
-        { name: "Global Legal Network", logo: "https://via.placeholder.com/200x100?text=Global+Legal" },
-        { name: "Tax & Finance Experts", logo: "https://via.placeholder.com/200x100?text=Tax+Experts" },
-        { name: "Maritime Advisors", logo: "https://via.placeholder.com/200x100?text=Maritime" },
-        { name: "Tech Compliance Co", logo: "https://via.placeholder.com/200x100?text=Tech+Comp" },
-      ]
-    },
-    {
-      title: "Corporate Clients",
-      description: "Telah dipercaya oleh berbagai sektor perusahaan dalam melindungi kepentingan bisnis mereka.",
-      logos: [
-        { name: "Bank Nasional", logo: "https://via.placeholder.com/200x100?text=Bank+Logo" },
-        { name: "Energy Corp", logo: "https://via.placeholder.com/200x100?text=Energy+Corp" },
-        { name: "Real Estate Group", logo: "https://via.placeholder.com/200x100?text=Real+Estate" },
-        { name: "Logistics Hub", logo: "https://via.placeholder.com/200x100?text=Logistics" },
-        { name: "Consumer Goods", logo: "https://via.placeholder.com/200x100?text=Consumer" },
-      ]
-    }
-  ];
+    const fetchPartners = async () => {
+      try {
+        const response = await axios.get('/partners');
+        setPartners(response.data.data || []);
+      } catch (err) {
+        console.error('Failed to load partners:', err);
+        setError('Gagal memuat mitra. Coba lagi nanti.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPartners();
+  }, []);
 
   return (
     <div className="w-full">
@@ -45,29 +49,33 @@ const Partners = () => {
 
       {/* Partners List Section */}
       <section className="py-24 px-4 md:px-10 bg-white">
-        <div className="max-w-7xl mx-auto space-y-32">
-          {partnerCategories.map((category, idx) => (
-            <div key={idx} className="text-center">
-              <div className="mb-12">
-                <h2 className="text-3xl md:text-4xl font-bold text-black mb-4">{category.title}</h2>
-                <div className="w-20 h-1 bg-[#C5A02E] mx-auto mb-6"></div>
-                <p className="text-gray-600 max-w-2xl mx-auto">{category.description}</p>
-              </div>
-              
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12 items-center justify-items-center opacity-70">
-                {category.logos.map((p, i) => (
-                  <div key={i} className="group grayscale hover:grayscale-0 transition-all duration-500">
-                    <img 
-                      src={p.logo} 
-                      alt={p.name} 
-                      className="max-h-16 md:max-h-20 w-auto object-contain"
-                    />
-                    <p className="mt-4 text-xs font-bold text-gray-400 group-hover:text-[#C5A02E] uppercase tracking-widest">{p.name}</p>
-                  </div>
-                ))}
-              </div>
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold text-black mb-4">Mitra Kami</h2>
+            <div className="w-20 h-1 bg-[#C5A02E] mx-auto mb-6"></div>
+            <p className="text-gray-600 max-w-2xl mx-auto">Tampilan ini menampilkan mitra yang telah diinput melalui dashboard admin.</p>
+          </div>
+
+          {loading ? (
+            <div className="py-20 text-center text-slate-500">Memuat mitra...</div>
+          ) : error ? (
+            <div className="py-20 text-center text-red-600">{error}</div>
+          ) : partners.length === 0 ? (
+            <div className="py-20 text-center text-slate-500">Belum ada mitra terdaftar saat ini.</div>
+          ) : (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12 items-center justify-items-center opacity-90">
+              {partners.map((partner) => (
+                <div key={partner.id} className="group transition-all duration-500 text-center">
+                  <img
+                    src={getLogoUrl(partner.logo_url)}
+                    alt={partner.name}
+                    className="max-h-16 md:max-h-20 w-auto object-contain mx-auto"
+                  />
+                  <p className="mt-4 text-xs font-bold text-slate-500 group-hover:text-[#C5A02E] uppercase tracking-widest">{partner.name}</p>
+                </div>
+              ))}
             </div>
-          ))}
+          )}
         </div>
       </section>
 

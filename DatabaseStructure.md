@@ -1,5 +1,7 @@
 Siap, ini aku tuliskan ulang dalam format **Markdown rapi + profesional** untuk kamu pakai sebagai dokumentasi utama (pengganti yang lama) 🔥
 
+> Skrip pembuatan ulang database ada di `backend/src/scripts/recreate_database.js`.
+>
 ---
 
 # 🗄️ Database Structure - Lawyer Web App (Final Version)

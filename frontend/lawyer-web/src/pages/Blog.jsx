@@ -6,7 +6,8 @@ const Blog = () => {
   const [allBlogs, setAllBlogs] = useState([]);
   const [suggestedBlogs, setSuggestedBlogs] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [visibleAllBlogsCount, setVisibleAllBlogsCount] = useState(12);
+  const [visibleAllBlogsCount, setVisibleAllBlogsCount] = useState(8);
+  const [randomAllBlogs, setRandomAllBlogs] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All Categories');
   const [categoryOptions, setCategoryOptions] = useState(['All Categories']);
@@ -49,6 +50,12 @@ const Blog = () => {
     return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
   };
 
+  const sortedBlogs = useMemo(() => {
+    return [...allBlogs].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+  }, [allBlogs]);
+
+  const latestBlogs = useMemo(() => sortedBlogs.slice(0, 4), [sortedBlogs]);
+
   const filteredBlogs = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
 
@@ -67,44 +74,61 @@ const Blog = () => {
     });
   }, [allBlogs, searchQuery, selectedCategory]);
 
-  const latestBlogs = filteredBlogs.slice(0, 4);
+  const popularCategory = useMemo(() => {
+    const counts = allBlogs.reduce((acc, blog) => {
+      const category = blog.category_name || 'Uncategorized';
+      acc[category] = (acc[category] || 0) + 1;
+      return acc;
+    }, {});
+
+    const sortedCategories = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+    return sortedCategories.length ? sortedCategories[0][0] : null;
+  }, [allBlogs]);
 
   useEffect(() => {
     const loadSuggestedBlogs = async () => {
       try {
-        const keyword = searchQuery.trim() || (selectedCategory && selectedCategory !== 'All Categories' ? selectedCategory : null);
+        const keyword = searchQuery.trim() || (selectedCategory && selectedCategory !== 'All Categories' ? selectedCategory : popularCategory);
         const suggested = await fetchSuggestedBlogs(keyword);
-        setSuggestedBlogs(suggested.slice(0, 4));
+        setSuggestedBlogs(suggested.filter((blog) => blog.status === 'published').slice(0, 4));
       } catch (error) {
         console.error('Failed to load suggested blogs:', error);
+        setSuggestedBlogs([]);
       }
     };
 
     if (!loading) {
       loadSuggestedBlogs();
-      setVisibleAllBlogsCount(12);
+      setVisibleAllBlogsCount(8);
     }
-  }, [searchQuery, selectedCategory, loading]);
+  }, [searchQuery, selectedCategory, popularCategory, loading]);
 
   const handleViewMore = () => {
-    setVisibleAllBlogsCount(prev => prev + 8);
+    if (visibleAllBlogsCount >= randomAllBlogs.length) {
+      setVisibleAllBlogsCount(8);
+    } else {
+      setVisibleAllBlogsCount(prev => Math.min(prev + 4, randomAllBlogs.length));
+    }
   };
 
-  const visibleAllBlogs = useMemo(() => {
+  useEffect(() => {
     const latestIds = new Set(latestBlogs.map(b => b.id));
     const suggestedIds = new Set(suggestedBlogs.map(b => b.id));
     const excludedIds = new Set([...latestIds, ...suggestedIds]);
 
     const remainingBlogs = filteredBlogs.filter(blog => !excludedIds.has(blog.id));
-    return remainingBlogs.slice(0, visibleAllBlogsCount);
-  }, [filteredBlogs, latestBlogs, suggestedBlogs, visibleAllBlogsCount]);
+    const shuffled = remainingBlogs
+      .map((value) => ({ value, sort: Math.random() }))
+      .sort((a, b) => a.sort - b.sort)
+      .map(({ value }) => value);
 
-  const hasMoreBlogs = visibleAllBlogsCount < filteredBlogs.filter(blog => {
-    const latestIds = new Set(latestBlogs.map(b => b.id));
-    const suggestedIds = new Set(suggestedBlogs.map(b => b.id));
-    const excludedIds = new Set([...latestIds, ...suggestedIds]);
-    return !excludedIds.has(blog.id);
-  }).length;
+    setRandomAllBlogs(shuffled);
+    setVisibleAllBlogsCount(8);
+  }, [filteredBlogs, latestBlogs, suggestedBlogs]);
+
+  const visibleAllBlogs = useMemo(() => randomAllBlogs.slice(0, visibleAllBlogsCount), [randomAllBlogs, visibleAllBlogsCount]);
+  const showMoreButtonVisible = randomAllBlogs.length > 8;
+  const hasMoreBlogs = visibleAllBlogsCount < randomAllBlogs.length;
 
   if (loading) {
     return (
@@ -243,7 +267,7 @@ const Blog = () => {
             <h2 className="text-3xl md:text-4xl font-bold text-black mb-12 text-center uppercase tracking-wider">
               All <span className="text-[#C5A02E]">Articles</span>
             </h2>
-            <div className="grid md:grid-cols-3 gap-8">
+            <div className="grid md:grid-cols-4 gap-8">
               {visibleAllBlogs.map((post) => (
                 <div key={post.id} className="bg-white shadow-sm hover:shadow-xl transition-shadow duration-300 group flex flex-col h-full">
                   <div className="aspect-video bg-neutral-200 overflow-hidden relative">
@@ -277,13 +301,13 @@ const Blog = () => {
             </div>
 
             {/* View More Button */}
-            {hasMoreBlogs && (
+            {showMoreButtonVisible && (
               <div className="text-center mt-16">
                 <button
                   onClick={handleViewMore}
                   className="bg-[#C5A02E] text-black font-bold py-4 px-8 uppercase tracking-wider hover:bg-black hover:text-[#C5A02E] transition-colors duration-300"
                 >
-                  View More Articles
+                  {hasMoreBlogs ? 'View More Articles' : 'Show Less'}
                 </button>
               </div>
             )}

@@ -13,12 +13,16 @@ const Home = () => {
     { label: "Penghargaan", value: "12" },
   ];
 
-  const practiceAreas = [
-    { id: "korporasi", title: "Hukum Korporasi", desc: "Solusi legal menyeluruh untuk kebutuhan bisnis dan regulasi perusahaan Anda." },
-    { id: "pidana", title: "Hukum Pidana", desc: "Pembelaan hukum yang tangguh dan strategis untuk melindungi hak-hak Anda." },
-    { id: "keluarga", title: "Hukum Keluarga", desc: "Pendampingan profesional untuk urusan perceraian, hak asuh, dan waris." },
-    { id: "properti", title: "Properti & Real Estate", desc: "Keamanan transaksi dan penyelesaian sengketa aset properti secara legal." },
-  ];
+  const [practiceAreas, setPracticeAreas] = React.useState([]);
+
+  React.useEffect(() => {
+    // dynamic import to avoid circular deps
+    import('../services/practiceAreaService').then(module => {
+      module.default.getAll()
+        .then(data => setPracticeAreas(data || []))
+        .catch(() => setPracticeAreas([]));
+    }).catch(() => setPracticeAreas([]));
+  }, []);
 
   const blogs = [
     { id: 1, title: "Pentingnya Legalitas Bisnis di Era Digital", date: "15 Oct 2023", category: "Corporate" },
@@ -42,6 +46,9 @@ const Home = () => {
             <h1 className="text-4xl md:text-7xl font-bold text-white mb-6 leading-tight uppercase tracking-tighter">
               Keadilan & <span className="text-[#C5A02E]">Integritas</span>
             </h1>
+            <p className="text-lg md:text-xl text-[#C5A02E] mb-6 max-w-2xl font-semibold">
+              Menjaga Kepercayaan Klien dan Relasi sebagai Prioritas Utama.
+            </p>
             <p className="text-lg md:text-xl text-gray-300 mb-10 max-w-2xl font-light">
               Kami memberikan solusi hukum yang transparan dan terpercaya untuk melindungi setiap langkah Anda.
             </p>
@@ -117,11 +124,11 @@ const Home = () => {
 
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
             {practiceAreas.map((area, i) => (
-              <div key={i} className="group p-10 border border-white/10 hover:border-[#C5A02E] transition-all duration-500 bg-neutral-900/50">
+              <div key={area.id || i} className="group p-10 border border-white/10 hover:border-[#C5A02E] transition-all duration-500 bg-neutral-900/50">
                 <div className="w-12 h-1 bg-[#C5A02E] mb-8 group-hover:w-full transition-all duration-500"></div>
                 <h4 className="text-xl font-bold mb-4 group-hover:text-[#C5A02E] transition-colors">{area.title}</h4>
-                <p className="text-gray-400 text-sm leading-relaxed mb-6">{area.desc}</p>
-                <Link to={`/practice#${area.id}`} className="text-[#C5A02E] text-xs font-bold uppercase tracking-widest flex items-center gap-2">
+                <p className="text-gray-400 text-sm leading-relaxed mb-6">{area.description}</p>
+                <Link to={`/practice#${area.slug || area.id}`} className="text-[#C5A02E] text-xs font-bold uppercase tracking-widest flex items-center gap-2">
                   Detail <span>&rarr;</span>
                 </Link>
               </div>

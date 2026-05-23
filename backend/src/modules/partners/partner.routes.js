@@ -31,11 +31,12 @@ const upload = multer({
   }
 }).single('logo');
 
-router.use(authMiddleware);
-
+// Public read-only endpoints for partners
 router.get('/', partnerController.getAllPartners);
 router.get('/:id', partnerController.getPartnerById);
-router.post('/', (req, res, next) => {
+
+// Protected admin endpoints
+router.post('/', authMiddleware, (req, res, next) => {
   upload(req, res, (err) => {
     if (err) {
       return res.status(400).json({ message: err.message });
@@ -43,7 +44,7 @@ router.post('/', (req, res, next) => {
     next();
   });
 }, partnerController.createPartner);
-router.put('/:id', (req, res, next) => {
+router.put('/:id', authMiddleware, (req, res, next) => {
   upload(req, res, (err) => {
     if (err) {
       return res.status(400).json({ message: err.message });
@@ -51,6 +52,6 @@ router.put('/:id', (req, res, next) => {
     next();
   });
 }, partnerController.updatePartner);
-router.delete('/:id', partnerController.deletePartner);
+router.delete('/:id', authMiddleware, partnerController.deletePartner);
 
 module.exports = router;

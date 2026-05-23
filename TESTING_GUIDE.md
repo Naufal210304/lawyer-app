@@ -105,8 +105,7 @@ backend/src/modules/auth/auth.controller.js
 - Login endpoint → returns profile_pic
 - /me endpoint → returns profile_pic
 
-backend/reset_password.js (NEW)
-backend/reset_password_admin.js (NEW)
+backend/reset_passwords.js (NEW)
 ```
 
 ### Frontend

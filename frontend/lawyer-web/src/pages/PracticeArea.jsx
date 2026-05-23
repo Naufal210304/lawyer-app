@@ -17,36 +17,13 @@ const PracticeArea = () => {
     }
   }, [hash]);
 
-  const practiceAreas = [
-    { 
-      id: "korporasi",
-      title: "Hukum Korporasi", 
-      desc: "Solusi legal menyeluruh untuk kebutuhan bisnis dan regulasi perusahaan Anda.",
-      detail: "Layanan ini mencakup pendampingan hukum dalam pendirian badan usaha, penyusunan kontrak komersial, merger dan akuisisi, hingga kepatuhan regulasi industri.",
-      cases: "Contoh Kasus: Sengketa antar pemegang saham, peninjauan kontrak vendor skala besar, dan restrukturisasi perusahaan."
-    },
-    { 
-      id: "pidana",
-      title: "Hukum Pidana", 
-      desc: "Pembelaan hukum yang tangguh dan strategis untuk melindungi hak-hak Anda.",
-      detail: "Kami memberikan pendampingan hukum mulai dari tingkat penyelidikan di Kepolisian, penyidikan di Kejaksaan, hingga proses persidangan di Pengadilan.",
-      cases: "Contoh Kasus: Pembelaan dalam kasus dugaan penipuan/penggelapan, tindak pidana korupsi, dan pencemaran nama baik di media digital."
-    },
-    { 
-      id: "keluarga",
-      title: "Hukum Keluarga", 
-      desc: "Pendampingan profesional untuk urusan perceraian, hak asuh, dan waris.",
-      detail: "Fokus pada penyelesaian masalah keluarga secara humanis dan sesuai hukum yang berlaku, baik secara litigasi maupun mediasi.",
-      cases: "Contoh Kasus: Gugatan perceraian, penetapan hak asuh anak, pembagian harta bersama (gono-gini), dan sengketa waris."
-    },
-    { 
-      id: "properti",
-      title: "Properti & Real Estate", 
-      desc: "Keamanan transaksi dan penyelesaian sengketa aset properti secara legal.",
-      detail: "Memastikan setiap transaksi properti aman secara hukum dan membantu penyelesaian jika terjadi tumpang tindih kepemilikan aset.",
-      cases: "Contoh Kasus: Sengketa lahan/tanah, pemeriksaan keabsahan sertifikat (due diligence), dan sengketa sewa-menyewa bangunan komersial."
-    },
-  ];
+  const [practiceAreas, setPracticeAreas] = useState([]);
+
+  useEffect(() => {
+    import('../services/practiceAreaService').then(module => {
+      module.default.getAll().then(data => setPracticeAreas(data || [])).catch(() => setPracticeAreas([]));
+    }).catch(() => setPracticeAreas([]));
+  }, []);
 
   const faqs = [
     {
@@ -86,10 +63,10 @@ const PracticeArea = () => {
         <div className="max-w-7xl mx-auto">
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
             {practiceAreas.map((area, i) => (
-              <div key={i} className="group p-10 border border-gray-200 hover:border-[#C5A02E] transition-all duration-500 bg-white shadow-sm">
+              <div key={area.id || i} className="group p-10 border border-gray-200 hover:border-[#C5A02E] transition-all duration-500 bg-white shadow-sm">
                 <div className="w-12 h-1 bg-[#C5A02E] mb-8 group-hover:w-full transition-all duration-500"></div>
                 <h4 className="text-xl font-bold mb-4 text-black group-hover:text-[#C5A02E] transition-colors">{area.title}</h4>
-                <p className="text-gray-600 text-sm leading-relaxed">{area.desc}</p>
+                <p className="text-gray-600 text-sm leading-relaxed">{area.description}</p>
               </div>
             ))}
           </div>
@@ -102,13 +79,13 @@ const PracticeArea = () => {
           <h2 className="text-3xl md:text-4xl font-bold text-black mb-16 text-center">Detail & Cakupan Layanan</h2>
           <div className="space-y-16">
             {practiceAreas.map((area) => (
-              <div key={area.id} id={area.id} className="border-l-4 border-[#C5A02E] pl-6 md:pl-10 scroll-mt-24">
+              <div key={area.id} id={area.slug || area.id} className="border-l-4 border-[#C5A02E] pl-6 md:pl-10 scroll-mt-24">
                 <h3 className="text-2xl font-bold text-black mb-4">{area.title}</h3>
                 <p className="text-gray-700 text-lg leading-relaxed mb-4">
                   {area.detail}
                 </p>
                 <div className="bg-gray-50 p-6 rounded-r-lg italic text-gray-600 border-l border-gray-200">
-                  {area.cases}
+                  {area.cases_example}
                 </div>
               </div>
             ))}

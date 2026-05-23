@@ -77,30 +77,34 @@ const About = () => {
         </div>
       </section>
 
-      {/* Section: Sejarah Perusahaan */}
+      {/* Section: Sejarah Perusahaan (diganti dengan isi PDF - Tentang Kami) */}
       <section className="py-24 px-4 md:px-10 bg-white">
         <div className="max-w-7xl mx-auto">
           <h2 className="text-[#C5A02E] font-semibold tracking-widest uppercase mb-4 text-sm text-center">
-            Perjalanan Kami
+            Sejarah
           </h2>
           <h3 className="text-4xl md:text-5xl font-bold text-black mb-12 leading-tight text-center">
-            Sejarah Firma Hukum Saminan & Partners
+            Tentang Firma Kami
           </h3>
           <div className="text-gray-700 text-lg leading-relaxed space-y-6 max-w-4xl mx-auto">
             <p>
-              Didirikan pada tahun 2008 oleh Bapak Saminan, S.H., firma hukum kami bermula dari sebuah visi sederhana: menyediakan layanan hukum yang tidak hanya kompeten, tetapi juga berlandaskan pada integritas dan empati. Dalam dekade terakhir, kami telah tumbuh menjadi salah satu firma hukum terkemuka di Indonesia, dikenal karena pendekatan inovatif dan komitmen tak tergoyahkan terhadap klien.
+              Kantor Hukum SYAHMINAN & PARTNERS (SP Law Office) merupakan firma hukum yang bergerak di
+              bidang jasa layanan hukum, dengan komitmen memberikan pelayanan yang profesional, terpercaya,
+              dan berorientasi pada kepentingan klien. SP Law Office didirikan oleh para advokat yang berpengalaman dan memiliki rekam jejak dalam
+              menangani berbagai perkara hukum, baik yang dihadapi oleh individu maupun badan hukum/korporasi.
             </p>
+
             <p>
-              Dari kasus-kasus korporasi yang kompleks hingga litigasi keluarga yang sensitif, setiap tantangan telah membentuk keahlian dan reputasi kami. Kami bangga dengan tim pengacara kami yang berdedikasi, yang tidak hanya ahli dalam bidangnya masing-masing, tetapi juga memahami nuansa hukum yang terus berkembang. Kami percaya bahwa setiap kasus adalah unik dan membutuhkan strategi yang disesuaikan, itulah sebabnya kami selalu mengedepankan solusi yang efektif dan berkelanjutan.
-            </p>
-            <p>
-              Perjalanan kami adalah cerminan dari kepercayaan yang diberikan klien kepada kami. Kami terus berinovasi, beradaptasi dengan perubahan zaman, dan memperluas jangkauan layanan kami untuk memenuhi kebutuhan hukum yang semakin beragam.
+              SP Law Office menyediakan layanan konsultasi, pendampingan, serta representasi hukum, baik dalam
+              ranah litigasi maupun non-litigasi. Dengan pendekatan yang strategis dan komprehensif, setiap
+              permasalahan hukum klien ditangani secara cermat, responsif, dan profesional guna memberikan
+              solusi hukum yang efektif dan optimal.
             </p>
           </div>
         </div>
       </section>
 
-      {/* Section: Visi & Misi */}
+      {/* Section: Visi & Misi (disesuaikan dengan PDF) */}
       <section className="py-24 px-4 md:px-10 bg-gray-100">
         <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-16">
           <div>
@@ -111,7 +115,8 @@ const About = () => {
               Visi Kami
             </h3>
             <p className="text-gray-700 text-lg leading-relaxed">
-              Menjadi firma hukum terdepan yang diakui secara nasional dan internasional atas keunggulan layanan, integritas, dan kontribusinya terhadap penegakan keadilan di masyarakat.
+              Menjadi firma hukum yang terpercaya, profesional, dan berintegritas, dengan mengedepankan
+              kepercayaan klien serta membangun hubungan jangka panjang yang berkelanjutan.
             </p>
           </div>
           <div>
@@ -122,12 +127,83 @@ const About = () => {
               Misi Kami
             </h3>
             <ul className="text-gray-700 text-lg leading-relaxed space-y-4 list-disc list-inside">
-              <li>Memberikan representasi hukum yang berkualitas tinggi dan berorientasi pada hasil.</li>
-              <li>Membangun hubungan jangka panjang dengan klien berdasarkan kepercayaan dan transparansi.</li>
-              <li>Mendorong inovasi dalam praktik hukum untuk solusi yang lebih efektif.</li>
-              <li>Berkomitmen pada pengembangan profesional berkelanjutan bagi seluruh tim.</li>
-              <li>Berperan aktif dalam edukasi hukum dan advokasi untuk kebaikan masyarakat.</li>
+              <li>Memberikan layanan hukum profesional dan berorientasi pada klien.</li>
+              <li>Menjaga kepercayaan melalui pelayanan yang transparan dan akuntabel.</li>
+              <li>Menyediakan solusi hukum yang strategis dan efektif.</li>
+              <li>Membangun hubungan jangka panjang dengan klien dan relasi.</li>
+              <li>Menjunjung tinggi integritas, etika, dan keadilan.</li>
             </ul>
+          </div>
+        </div>
+      </section>
+
+      {/* Section: Pengalaman Menangani Perkara */}
+      <section className="py-24 px-4 md:px-10 bg-white">
+        <div className="max-w-7xl mx-auto">
+          <div>
+            <h2 className="text-[#C5A02E] font-semibold tracking-widest uppercase mb-4 text-sm text-center">
+              Pengalaman Hukum
+            </h2>
+            <h3 className="text-4xl md:text-5xl font-bold text-black mb-8 leading-tight text-center">
+              Pengalaman Menangani Perkara
+            </h3>
+            <p className="text-gray-700 text-lg leading-relaxed max-w-4xl mx-auto mb-8">
+              Firma kami memiliki pengalaman yang luas dalam menangani berbagai jenis perkara hukum,
+              baik dalam ranah litigasi maupun non-litigasi, yang meliputi:
+            </p>
+            <ul className="text-gray-700 text-lg leading-relaxed space-y-4 list-disc list-inside max-w-4xl mx-auto">
+              <li>Perkara perdata (wanprestasi &amp; perbuatan melawan hukum, termasuk class action).</li>
+              <li>Perkara pidana (umum &amp; khusus).</li>
+              <li>Sengketa perbankan &amp; bisnis.</li>
+              <li>Sengketa ketenagakerjaan &amp; kepegawaian.</li>
+              <li>Sengketa kepemilikan.</li>
+              <li>Sengketa keluarga (waris, dll.).</li>
+              <li>Sengketa administrasi negara (PTUN).</li>
+              <li>Sengketa lelang.</li>
+              <li>Sengketa partai politik (kepengurusan &amp; PAW).</li>
+              <li>Sengketa kepemiluan (PHPU, DCS/DCT, sengketa Pilkada, DKPP).</li>
+              <li>Penyusunan dan review kontrak serta produk hukum (naskah akademik &amp; qanun).</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      {/* Section: Klien yang Pernah Ditangani */}
+      <section className="py-24 px-4 md:px-10 bg-[#F9F7F1]">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-[#C5A02E] font-semibold tracking-widest uppercase mb-4 text-sm">
+              Klien Kami
+            </h2>
+            <h3 className="text-4xl md:text-5xl font-bold text-black leading-tight">
+              Klien yang Pernah Ditangani
+            </h3>
+          </div>
+          <div className="rounded-xl border border-[#C5A02E]/20 p-8 bg-white shadow-sm">
+            <p className="text-gray-700 text-lg leading-relaxed">
+              1. PT. Ayam Lepas Nusantara
+            </p>
+            <p className="text-gray-700 text-lg leading-relaxed mt-4">
+              2. dKupi Aceh Coffe Shop
+            </p>
+            <p className="text-gray-700 text-lg leading-relaxed mt-4">
+              3. CV. Kulu Bersaudara
+            </p>
+            <p className="text-gray-700 text-lg leading-relaxed mt-4">
+              4. Partai Damai Aceh
+            </p>
+            <p className="text-gray-700 text-lg leading-relaxed mt-4">
+              5. Partai Nanggroe Aceh
+            </p>
+            <p className="text-gray-700 text-lg leading-relaxed mt-4">
+              6. Partai Persatuan Pembangunan
+            </p>
+            <p className="text-gray-700 text-lg leading-relaxed mt-4">
+              7. Partai Keadilan dan Persatuan Indonesia
+            </p>
+            <p className="text-gray-700 text-lg leading-relaxed mt-4">
+              8. Individu maupun badan hukum/korporasi lainnya
+            </p>
           </div>
         </div>
       </section>
